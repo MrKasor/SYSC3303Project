@@ -4,12 +4,18 @@
 package project;
 
 /**
- * @author Ryan
+ * @author Ryan, Colton
+ * 
+ * Class Test is used to verify that data is being
+ * transferred and received by the various classes.
  *
  */
 public class Test {
 
 	/**
+	 * Creates threads of all the Classes, which start() 
+	 * when their constructor is called.
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {

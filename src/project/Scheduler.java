@@ -6,7 +6,9 @@ package project;
 import java.util.ArrayList;
 
 /**
- * @author Ryan
+ * @author Ryan, Colton
+ * 
+ * Class Scheduler represents the scheduler of the elevator system.
  *
  */
 public class Scheduler extends Thread{
@@ -22,6 +24,9 @@ public class Scheduler extends Thread{
 		start();
 	}
 	
+	/**
+	 * Method which takes place when the Scheduler thread has started.
+	 */
 	public void run() {	
 		while(true) {
 			if(hasData) {
@@ -29,6 +34,13 @@ public class Scheduler extends Thread{
 					netRef.transfer(data, 3, id);
 					toFloor = true;
 					hasData = false;
+					
+					String temp = "";
+					for(String line: data) {
+						temp = temp + line + " ";
+					}
+					System.out.println("Schedule: " +temp);
+					
 				}else {
 					netRef.transfer(data, 1, id);
 					toFloor = false;
