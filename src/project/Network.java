@@ -6,7 +6,10 @@ package project;
 import java.util.ArrayList;
 
 /**
- * @author Ryan
+ * @author Ryan, Colton
+ * 
+ * Class Network is used to synchronize the Threads
+ * of the Elevator, Floor, and Scheduler Classes.
  *
  */
 public class Network {
@@ -14,6 +17,13 @@ public class Network {
 	boolean hasSomething = false;
 	int n = 1;
 	
+	/**
+	 * transfer is used to send data from one thread to another
+	 * 
+	 * @param data
+	 * @param destination
+	 * @param id
+	 */
 	public synchronized void transfer(ArrayList<String> data, int destination, int id) {
 		while(hasSomething) {
 			try{
@@ -31,6 +41,12 @@ public class Network {
 		notifyAll();
 	}
 	
+	/**
+	 * recieve is used to gather data from another thread.
+	 * 
+	 * @param destination
+	 * @return
+	 */
 	public synchronized ArrayList<String> recieve(int destination) {	
 		while(n != destination) {
 			try{

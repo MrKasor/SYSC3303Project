@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 /**
  * @author Ryan, Colton
+ * 
+ * Class Floor represents a single floor in a building.
  *
  */
 public class Floor extends Thread{
@@ -17,6 +19,13 @@ public class Floor extends Thread{
 	private boolean hasData = false, run = true;
 	private ArrayList<String> data = new ArrayList<String>();
 	
+	
+	/**
+	 * Constructor. Starts the floor thread.
+	 * 
+	 * @param id
+	 * @param netRef
+	 */
 	public Floor(int id, Network netRef) {
 		this.id=id;
 		this.netRef=netRef;
@@ -25,6 +34,12 @@ public class Floor extends Thread{
 		start();
 	}
 	
+	/**
+	 * Reads input from a text file, and stores it in an ArrayList
+	 * of type String.
+	 * 
+	 * @return data
+	 */
 	public ArrayList<String> read(){
 		ArrayList<String> data = new ArrayList<String>();
 		
@@ -36,7 +51,7 @@ public class Floor extends Thread{
 	        while (input.hasNextLine()) {
 	            String line = input.nextLine();
 	            data.add(line);
-	            System.out.println(line);
+	            //System.out.println(line);
 	        }
 	        input.close();
 	
@@ -46,6 +61,9 @@ public class Floor extends Thread{
 		return data;
 	}
 	
+	/**
+	 *  Method to run the thread
+	 */
 	public void run() {	
 		while(run) {
 			if(hasData) {
@@ -56,6 +74,12 @@ public class Floor extends Thread{
 				if(count == 3) {
 					run = false;
 				}
+				
+				String temp = "";
+				for(String line: data) {
+					temp = temp + line + " ";
+				}
+				System.out.println("Floor: " +temp);
 			}
 			else {
 				data = netRef.recieve(id);
