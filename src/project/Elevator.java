@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * Class Elevator represents a single elevator inside a building.
  *
  */
-public class Elevator extends Thread{
+public class Elevator implements Runnable{
 	private int id;
 	private Network netRef;
 	private ArrayList<String> data = new ArrayList<String>();
@@ -25,28 +25,57 @@ public class Elevator extends Thread{
 	public Elevator(int id, Network netRef) {
 		this.id=id;
 		this.netRef=netRef;
-		start();
 	}
 	
-	/**
-	 * Method which takes place when an Elevator thread has started.
-	 */
-	public void run() {	
-		while(true) {
-			if(hasData) {
-				netRef.transfer(data, 2, id);
-				hasData = false;
-				String temp = "";
-				for(String line: data) {
-					temp = temp + line + " ";
-				}
-				System.out.println("Elevator: " +temp);
-			}
-			else {
+	public enum ElevatorState
+	{
+		Waiting,
+		Stopped,
+		Moving;
+	}
+	ElevatorState state = ElevatorState.Waiting;
+	
+	
+	public void run()
+	{
+		while(true)
+		{
+			while(state == ElevatorState.Waiting)
+			{
+				System.out.println("\nElevator is waiting for information...\n");
 				data = netRef.recieve(id);
 				hasData = true;
+				state = ElevatorState.Moving;
 			}
-		} 
+			while(state == ElevatorState.Stopped)
+			{
+				//Sleep while customers are boarding/disembarking, then switch to waiting.
+				System.out.println("\nElevator is stopped, people are boarding/disembarking...\n");
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				state = ElevatorState.Waiting;
+			}
+			while(state == ElevatorState.Moving)
+			{
+				if(hasData) 
+				{
+					System.out.println("\nElevator is moving...\n");
+					netRef.transfer(data, 2, id);
+					hasData = false;
+					String temp = "";
+					for(String line: data) 
+					{
+						temp = temp + line + " ";
+					}
+					System.out.println("Elevator: " +temp);
+				}
+				state = ElevatorState.Stopped;
+			}
+		}
 	}
 	
 }

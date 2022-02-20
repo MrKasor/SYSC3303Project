@@ -11,47 +11,70 @@ import java.util.ArrayList;
  * Class Scheduler represents the scheduler of the elevator system.
  *
  */
-public class Scheduler extends Thread{
+public class Scheduler implements Runnable{
 	private Network netRef;
 	private ArrayList<String> data;
 	private int id;
 	private boolean toFloor = false, hasData = false, go = true;
 	
-	public Scheduler(int id, Network netRef) {
+	public Scheduler(int id, Network netRef)
+    {
 		data = new ArrayList<String>();
-		this.id = id;
+    	this.id = id;
 		this.netRef = netRef;
-		start();
-	}
+    }
 	
-	/**
-	 * Method which takes place when the Scheduler thread has started.
-	 */
-	public void run() {	
-		while(true) {
-			if(hasData) {
-				if(toFloor == false) {
-					netRef.transfer(data, 3, id);
+	public enum SchedulingState {
+		Waiting,
+		Sending;
+	};
+	
+  
+    public void run()
+    {
+    	SchedulingState state = SchedulingState.Waiting;
+    	while(true)
+    	{
+    		//Waiting for instructions
+    		while(state == SchedulingState.Waiting)
+    		{
+    			System.out.println("Scheduler is waiting for instructions...");
+    			//While we are waiting for instructions
+    			data = netRef.recieve(id);
+    			
+    			//Set has data to true and go to the next state
+    			hasData = true;
+    			state = SchedulingState.Sending;
+    		}
+    		
+    		//Performing instructions
+    		while(state == SchedulingState.Sending)
+    		{
+    			System.out.println("Scheduler sending information...");
+    			if(toFloor)
+    			{
+        			netRef.transfer(data, 1, id);
+        			toFloor = false;
+    			}
+    			//If not being sent to the floor, we send to the elevator.
+    			if(!toFloor) 
+    			{
+    				netRef.transfer(data, 3, id);
 					toFloor = true;
-					hasData = false;
 					
 					String temp = "";
 					for(String line: data) {
 						temp = temp + line + " ";
 					}
 					System.out.println("Schedule: " +temp);
-					
-				}else {
-					netRef.transfer(data, 1, id);
-					toFloor = false;
-					hasData = false;
-				}
-				
-			}
-			else {
-				data = netRef.recieve(id);
-				hasData = true;
-			}
-		} 
-	}
+    			}
+    			
+    			//Transition to waiting state and set has data to false
+    			hasData = false;
+    			state = SchedulingState.Waiting;
+    		}
+    		
+    	}
+    }
+    
 }
