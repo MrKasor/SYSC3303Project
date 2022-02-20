@@ -3,7 +3,7 @@
  */
 package project;
 
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * @author Ryan, Colton
@@ -16,6 +16,15 @@ public class Network {
 	ArrayList<String> netData = new ArrayList<String>();
 	boolean hasSomething = false;
 	int n = 1;
+	Hashtable<String, String> dictionary = new Hashtable<>();
+	
+	//Function for inserting values into Hashtable
+	public void createHashTable() 
+	{
+		dictionary.put("1", "Floor");
+		dictionary.put("2", "Scheduler");
+		dictionary.put("3", "Elevator");
+	}
 	
 	/**
 	 * transfer is used to send data from one thread to another
@@ -35,7 +44,9 @@ public class Network {
 			n = destination;
 			netData = data;
 			hasSomething = true;
-			System.out.println("Network recieved data from "+id+" to be sent to "+n);
+			String s = "" + id;
+			String des = "" + n;
+			System.out.println("Network recieved data from "+dictionary.get(s)+" to be sent to "+dictionary.get(des));
 		}
 		
 		notifyAll();
@@ -53,11 +64,10 @@ public class Network {
 				wait();
 			} catch (InterruptedException e) {}
 		}
-		
-		System.out.println("Recieving data at "+n);
+		String des = "" + n;
+		System.out.println("Recieving data at "+dictionary.get(des));
 		hasSomething = false;
 		notifyAll();
 		return netData;
 	}
-
 }

@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * Class Floor represents a single floor in a building.
  *
  */
-public class Floor extends Thread{
+public class Floor implements Runnable{
 	private Network netRef;
 	private int id, count = 0;
 	private boolean hasData = false, run = true;
@@ -31,7 +31,6 @@ public class Floor extends Thread{
 		this.netRef=netRef;
 		data = read();
 		hasData = true;
-		start();
 	}
 	
 	/**
@@ -67,11 +66,12 @@ public class Floor extends Thread{
 	public void run() {	
 		while(run) {
 			if(hasData) {
+				System.out.println("Floor sending request to the scheduler...");
 				netRef.transfer(data, 2, id);
 				hasData = false;
 				
 				count++;
-				if(count == 3) {
+				if(count == 2) {
 					run = false;
 				}
 				
@@ -83,6 +83,7 @@ public class Floor extends Thread{
 			}
 			else {
 				data = netRef.recieve(id);
+				System.out.println("Floor has received information from scheduler");
 				hasData = true;
 			}
 		} 
