@@ -11,9 +11,10 @@ import java.util.ArrayList;
  */
 public class Elevator implements Runnable{
 	private int id;
-	private Network netRef;
-	private ArrayList<String> data = new ArrayList<String>();
-	private boolean hasData = false;
+	private ElevatorSubsystem sysRef;
+	private int destination = 0;
+	private int floor = 1;
+	private boolean hasPeople = false;
 	
 	
 	/**
@@ -22,9 +23,9 @@ public class Elevator implements Runnable{
 	 * @param id
 	 * @param netRef
 	 */
-	public Elevator(int id, Network netRef) {
+	public Elevator(int id, ElevatorSubsystem sysRef) {
 		this.id=id;
-		this.netRef=netRef;
+		this.sysRef=sysRef;
 	}
 	
 	public enum ElevatorState
@@ -38,43 +39,54 @@ public class Elevator implements Runnable{
 	
 	public void run()
 	{
-		while(true)
-		{
-			while(state == ElevatorState.Waiting)
-			{
-				System.out.println("\nElevator is waiting for information...\n");
-				data = netRef.recieve(id);
-				hasData = true;
+		String temp = "";
+		switch (state) {
+		
+			case Waiting:
+				destination = sysRef.send(id);
+				
+				if(destination > floor) {//Going up
+					temp = id+"|"+floor+"|0|0|0";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
+				}
+				else {//Going Down
+					temp = id+"|"+floor+"|0|0|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
+				}
+				
+				sysRef.updateData(id, temp); //update that elevator is moving
 				state = ElevatorState.Moving;
-			}
-			while(state == ElevatorState.Stopped)
-			{
-				//Sleep while customers are boarding/disembarking, then switch to waiting.
-				System.out.println("\nElevator is stopped, people are boarding/disembarking...\n");
+				break;
+				
+			case Stopped:
+				//Sleep while customers are getting on/off, then switch to waiting.
+				System.out.println("\nElevator "+id+" is stopped, people are boarding/disembarking.\n");
+				
+				if(hasPeople) {//Getting off
+					temp = id+"|"+floor+"|1|0|0";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
+				}
+				else {//Getting on
+					temp = id+"|"+floor+"|0|0|0";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
+				}
+				
 				try {
 					Thread.sleep(3000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
+				sysRef.updateData(id, temp); //Update that elevator has stopped
 				state = ElevatorState.Waiting;
-			}
-			while(state == ElevatorState.Moving)
-			{
-				if(hasData) 
-				{
-					System.out.println("\nElevator is moving...\n");
-					netRef.transfer(data, 2, id);
-					hasData = false;
-					String temp = "";
-					for(String line: data) 
-					{
-						temp = temp + line + " ";
-					}
-					System.out.println("Elevator: " +temp);
+				break;
+				
+			case Moving:
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
+				
+				System.out.println("Elevator: " +id);
 				state = ElevatorState.Stopped;
-			}
+				break;
 		}
 	}
 	
