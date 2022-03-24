@@ -111,7 +111,7 @@ public class Floor{
        int len = receivePacket.getLength();
        System.out.println("Length: " + len);
        System.out.print("Containing: "); 
-       System.out.println(String.valueOf(data[0])+String.valueOf(data[1])+String.valueOf(data[2])+String.valueOf(data[3]));
+       System.out.println(new String(receivePacket.getData()));
        System.out.println("\n");
    }
 	
