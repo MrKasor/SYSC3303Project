@@ -3,6 +3,7 @@
  */
 package project;
 
+import java.awt.Taskbar.State;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -11,8 +12,10 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import project.Elevator.ElevatorState;
+
 /**
- * @author Ryan, Colton
+ * @author Colton
  * 
  * Class Scheduler represents the scheduler of the elevator system.
  *
@@ -47,6 +50,15 @@ public class Scheduler{
 			System.exit(1);
 		}
 	}
+	
+	public enum SchedulerState
+	{
+		WaitingForButtonPress,
+		RequestingElevatorLocations,
+		SendingElevator,
+		UpdateFloor;
+	}
+	static SchedulerState state = SchedulerState.WaitingForButtonPress;
 	
 	/**
 	 * receive a packet from the floor subsystem.
@@ -273,11 +285,29 @@ public class Scheduler{
 		Scheduler scheduler = new Scheduler();
 		while(true)
 		{
-			scheduler.receivePacketFloorSubsystem();
-			scheduler.requestElevatorLocations();
-			scheduler.sendToElevatorSubsystem();
-			scheduler.sendToFloorSubsystem();
-			scheduler.receiveFromElevatorSubsystem();
+			switch (state)
+			{
+				case WaitingForButtonPress:
+					scheduler.receivePacketFloorSubsystem();
+					state = SchedulerState.RequestingElevatorLocations;
+					break;
+					
+				case RequestingElevatorLocations:
+					scheduler.requestElevatorLocations();
+					state = SchedulerState.SendingElevator;
+					break;
+					
+				case SendingElevator:
+					scheduler.sendToElevatorSubsystem();
+					state = SchedulerState.UpdateFloor;
+					break;
+					
+				case UpdateFloor:
+					scheduler.sendToFloorSubsystem();
+					state = SchedulerState.WaitingForButtonPress;
+					break;
+			}
+
 		}
 		
 	}
