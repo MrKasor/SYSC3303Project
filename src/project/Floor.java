@@ -15,7 +15,7 @@ import java.util.Scanner;
 import java.util.ArrayList;
 
 /**
- * @author Ryan, Colton
+ * @author Colton, Ryan
  * 
  * Class Floor represents a single floor in a building.
  *
@@ -111,7 +111,7 @@ public class Floor{
        int len = receivePacket.getLength();
        System.out.println("Length: " + len);
        System.out.print("Containing: "); 
-       System.out.println(String.valueOf(data[0])+String.valueOf(data[1])+String.valueOf(data[2])+String.valueOf(data[3]));
+       System.out.println(new String(receivePacket.getData()));
        System.out.println("\n");
    }
 	
@@ -145,29 +145,22 @@ public class Floor{
 	public static void main(String args[])
 	{
 		Floor c = new Floor();
-		String info = data.get(0);
 		
-		c.send(info, 5000, 1);
-		c.receive();
-		/*
-		boolean read = true;
-      
-		for (int i = 0; i < 11; i++)
+		for(String d: data)
 		{
-			if(read == true)
-			{
-				c.send(info, 5000, 1);
-				c.receive();
-				read = false;
-			}
-			else
-			{
-				c.send(info, 5000, 2);
-				c.receive();
-				read = true;
+			c.send(d, 5000, 1);
+			c.receive();
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
-		*/
+		
+		
+		
+		
 		
 	}
 	

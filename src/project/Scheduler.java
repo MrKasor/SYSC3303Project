@@ -3,6 +3,7 @@
  */
 package project;
 
+import java.awt.Taskbar.State;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -11,8 +12,10 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import project.Elevator.ElevatorState;
+
 /**
- * @author Ryan, Colton
+ * @author Colton
  * 
  * Class Scheduler represents the scheduler of the elevator system.
  *
@@ -23,6 +26,8 @@ public class Scheduler{
 	int requestFloor;
 	String direction;
 	int floorDestination;
+	
+	String elevatorToMove;
 
 	DatagramPacket sendPacket, receivePacket, serverPacket;
 	DatagramSocket sendReceiveSocket, receiveSocket;
@@ -45,6 +50,15 @@ public class Scheduler{
 			System.exit(1);
 		}
 	}
+	
+	public enum SchedulerState
+	{
+		WaitingForButtonPress,
+		RequestingElevatorLocations,
+		SendingElevator,
+		UpdateFloor;
+	}
+	static SchedulerState state = SchedulerState.WaitingForButtonPress;
 	
 	/**
 	 * receive a packet from the floor subsystem.
@@ -144,47 +158,33 @@ public class Scheduler{
 		String result = new String(serverPacket.getData());
 		String[] elevators = result.split(";");
 		System.out.print(elevators[0] + "\n" + elevators[1] + "\n" + elevators[2] + "\n" + elevators[3] + "\n");
-		String[] data1 = elevators[0].split("|");
-		String[] data2 = elevators[1].split("|");
-		String[] data3 = elevators[2].split("|");
-		String[] data4 = elevators[3].split("|");
-		
-		for(String d : data1)
-		{
-			System.out.print(d);
-		}
-		
-		
-		
-		//Find which is closest to the requestFloor
-		int elev1 = Integer.parseInt(data1[1]);
-		int elev2 = Integer.parseInt(data2[1]);
-		int elev3 = Integer.parseInt(data3[1]);
-		int elev4 = Integer.parseInt(data4[1]);
+		String[] data1 = elevators[0].split("\\|");
+		String[] data2 = elevators[1].split("\\|");
+		String[] data3 = elevators[2].split("\\|");
+		String[] data4 = elevators[3].split("\\|");
 		
 		
 		int[] elevs = new int[4];
-		elevs[0] = elev1;
-		elevs[1] = elev2;
-		elevs[2] = elev3;
-		elevs[3] = elev4;
+		elevs[0] = Integer.parseInt(data1[1]);
+		elevs[1] = Integer.parseInt(data2[1]);
+		elevs[2] = Integer.parseInt(data3[1]);
+		elevs[3] = Integer.parseInt(data4[1]);
 		
 		//need to implement a method for finding which floor is closest to the requestFloor
 		int distance = Math.abs(elevs[0] - requestFloor);
-		int id = 0;
+		int id = 1;
 		for(int i = 1; i < 4; i++)
 		{
 			int iDistance = Math.abs(elevs[i] - requestFloor);
 			if(iDistance < distance)
 			{
-				id = i;
+				id = i+1;
 				distance = iDistance;
 			}
 		}
 		
 		System.out.println("The id of the elevator to move is: "+id);
-		
-		
+		elevatorToMove = Integer.toString(id);
 	}
 	
 	/*
@@ -192,9 +192,16 @@ public class Scheduler{
 	 */
 	private void sendToElevatorSubsystem()
 	{
+		 //Create byte array and assign first byte to 0.
+		 byte[] toSend = new byte[100];
+		 
+		 String format = elevatorToMove+"|"+requestFloor+"|"+floorDestination+"|";
+		 //now we need to insert the message from data into our byte array.
+		 System.arraycopy(format.getBytes(), 0, toSend, 0, format.getBytes().length);
+		
 		//prepare the packet to send to server
 		try {
-			sendPacket = new DatagramPacket(receivePacket.getData(), receivePacket.getLength(), InetAddress.getLocalHost(), 5002);
+			sendPacket = new DatagramPacket(toSend, toSend.length, InetAddress.getLocalHost(), 5002);
 		} catch (UnknownHostException e) {
 	         e.printStackTrace();
 	         System.exit(1);
@@ -247,9 +254,17 @@ public class Scheduler{
 	 */
 	private void sendToFloorSubsystem()
 	{
+		String floorInfo= "Elevator " + elevatorToMove + " is on its way...";
+		
+		//Create byte array and assign first byte to 0.
+		 byte[] toSend = new byte[100];
+		   
+		 //now we need to insert the message from data into our byte array.
+		 System.arraycopy(floorInfo.getBytes(), 0, toSend, 0, floorInfo.getBytes().length);
+		
 		//prepare the packet to send to client
 		try {
-			sendPacket = new DatagramPacket(serverPacket.getData(), serverPacket.getLength(), InetAddress.getLocalHost(), receivePacket.getPort());
+			sendPacket = new DatagramPacket(toSend, toSend.length, InetAddress.getLocalHost(), receivePacket.getPort());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -270,11 +285,29 @@ public class Scheduler{
 		Scheduler scheduler = new Scheduler();
 		while(true)
 		{
-			scheduler.receivePacketFloorSubsystem();
-			scheduler.requestElevatorLocations();
-			scheduler.sendToElevatorSubsystem();
-			scheduler.receiveFromElevatorSubsystem();
-			scheduler.sendToFloorSubsystem();
+			switch (state)
+			{
+				case WaitingForButtonPress:
+					scheduler.receivePacketFloorSubsystem();
+					state = SchedulerState.RequestingElevatorLocations;
+					break;
+					
+				case RequestingElevatorLocations:
+					scheduler.requestElevatorLocations();
+					state = SchedulerState.SendingElevator;
+					break;
+					
+				case SendingElevator:
+					scheduler.sendToElevatorSubsystem();
+					state = SchedulerState.UpdateFloor;
+					break;
+					
+				case UpdateFloor:
+					scheduler.sendToFloorSubsystem();
+					state = SchedulerState.WaitingForButtonPress;
+					break;
+			}
+
 		}
 		
 	}

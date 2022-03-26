@@ -4,6 +4,12 @@ import java.util.*;
 
 import project.Elevator.ElevatorState;
 
+/**
+ * 
+ * @author Ryan, modified by Colton
+ *
+ */
+
 public class ElevatorSubsystem {
 	private DatagramSocket socket;
 	private DatagramPacket receivePacket, sendPacket;
@@ -13,6 +19,7 @@ public class ElevatorSubsystem {
 	private static final int NUM_ELE = 4;
 	private int nextEle = 0;
 	private int nextFloor = 0;
+	public int destinationFloor = 0;
 	private int arrivedEle = 0;
 	private int arrivedFloor = 0;
 	private Map<Integer, String> eleList = new HashMap<>();
@@ -29,30 +36,31 @@ public class ElevatorSubsystem {
 	
 	//When a floor needs a elevator
 	private void receivePacketOne() {
+		System.out.println("Waiting for packet from Scheduler...");
         receivePacket = helper.receivePacket(socket);
         helper.print(receivePacket, "Elevator Subsystem", "received from Scheduler");
         
         System.out.println("\nContaining: " + new String(receivePacket.getData()) +"\n");
     }
 	
-	//When the elevator has arrived
-	private void receivePacketTwo() {
+	//Scheduler returning which elevator to send and to where
+	synchronized void receivePacketTwo() {
         receivePacket = helper.receivePacket(socket);
         helper.print(receivePacket, "Elevator Subsystem", "received from Scheduler");
         
         System.out.println("\nContaining: " + new String(receivePacket.getData()) +"\n");
+        
+        String result = new String(receivePacket.getData());
+        String[] data = result.split("\\|");
+        nextEle = Integer.valueOf(data[0]);
+        nextFloor = Integer.valueOf(data[1]);
+        destinationFloor = Integer.valueOf(data[2]);
+        notifyAll();
     }
 	
 	//Convert the message into a byte array then send it
 	private void sendDataList() {
 		byte[] data = formatDataList();
-		sendPacket = helper.sendPacket(socket, data, SCH_PORT);
-		helper.print(sendPacket, "Elevator Subsystem", "sent to Scheduler");
-	}
-	
-	//Convert the message into a byte array then send it
-	private void sendDataArrived() {
-		byte[] data = formatDataArrived(arrivedEle, arrivedFloor);
 		sendPacket = helper.sendPacket(socket, data, SCH_PORT);
 		helper.print(sendPacket, "Elevator Subsystem", "sent to Scheduler");
 	}
@@ -66,38 +74,13 @@ public class ElevatorSubsystem {
 			int key = (int)mapElement.getKey();
 			String value = (String)mapElement.getValue();
 	            
-			temp = temp + key + "|" + value + " ";
+			temp = temp + value + ";";
 	    }
 		
-		byte[] data = new byte[4 + temp.getBytes().length];
-		data[0] = (byte)0;
-		data[1] = (byte)1;
-		
-		String test = "1|6|0|0|0;2|2|0|0|0;3|7|0|0|0;4|3|0|0|0;";
-		byte[] testing = new byte[test.getBytes().length];
-		System.arraycopy(test.getBytes(), 0, testing, 0, test.getBytes().length);
-		
+		byte[] data = new byte[temp.getBytes().length];
 		
 		//Add the message into the data byte array then set the byte after it to 0
-		System.arraycopy(temp.getBytes(), 0, data, size, temp.getBytes().length);
-		size += temp.getBytes().length;
-        
-        return testing;
-	}
-	
-	//Format a message of which elevator reached which floor to send to the scheduler
-	private byte[] formatDataArrived(int id, int floor) {
-		int size = 2;
-		String temp = id + "|" + floor;
-		
-		byte[] data = new byte[4 + temp.getBytes().length];
-		data[0] = (byte)0;
-		data[1] = (byte)2;
-		
-		//Add the message into the data byte array then set the byte after it to 0
-		System.arraycopy(temp.getBytes(), 0, data, size, temp.getBytes().length);
-		size += temp.getBytes().length;
-		data[size] = 0;
+		System.arraycopy(temp.getBytes(), 0, data, 0, temp.getBytes().length);
         
         return data;
 	}
@@ -116,9 +99,14 @@ public class ElevatorSubsystem {
 				wait();
 			} catch (InterruptedException e) {}
 		}
-        
+        nextEle = 0;
         notifyAll();
         return nextFloor;
+	}
+	
+	public int getDestinationFloor()
+	{
+		return destinationFloor;
 	}
 	
 	//Order that the methods run in
@@ -126,7 +114,6 @@ public class ElevatorSubsystem {
 		receivePacketOne();
 		sendDataList();
 		receivePacketTwo();
-		sendDataArrived();
 	}
 
 	/**
@@ -136,9 +123,12 @@ public class ElevatorSubsystem {
 		ElevatorSubsystem eleSystem = new ElevatorSubsystem();
 		System.out.println("Elevator System started");
 		
+		int incr = 1;
 		for (int i = 0; i < NUM_ELE; i++) {
 			Thread tempThread = new Thread(new Elevator(i+1, eleSystem), "Elevator: "+(i+1));
 			tempThread.start();
+			eleSystem.updateData(i+1, i+1+"|"+incr+"|0|0|0");
+			incr += 6;
         }
 
 		while(true) {
