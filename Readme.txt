@@ -18,6 +18,7 @@ Colton North
 - Updated Elevator class with another state, and updated the timing it takes for elevators to move floors, as well as the information they transmit.
 - Updated Floor Class so that it will send all values in input.txt.
 - Updated input.txt to request multiple times (3).
+- Scheduler State Diagram
 
 Ryan Kasor
 - Created basis for the Elevator Class.
