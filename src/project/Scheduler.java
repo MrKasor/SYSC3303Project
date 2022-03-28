@@ -27,6 +27,7 @@ public class Scheduler{
 	String direction;
 	int floorDestination;
 	
+	String[] elevatorsStatus = new String[4];
 	String elevatorToMove;
 
 	DatagramPacket sendPacket, receivePacket, serverPacket;
@@ -156,7 +157,57 @@ public class Scheduler{
 		
 		//parsing the result from elevator subsystem...
 		String result = new String(serverPacket.getData());
-		String[] elevators = result.split(";");
+		elevatorsStatus = result.split(";");
+		
+		//Choosing which elevator to send to pick up passengers.
+		int i = 0;
+		int num = 999999;
+		int distance = 0;
+		int id = 1;
+		int allElevatorsBusy = 0;
+		for(String elevator : elevatorsStatus)
+		{
+			String[] temp = elevator.split("\\|");
+			num = Integer.parseInt(temp[1]);
+			if(i == 0)
+			{
+				distance = Math.abs(num - requestFloor);
+			}
+				
+			if(temp[2].equals("0"))
+			{
+				int iDistance = Math.abs(num - requestFloor);
+				if(iDistance < distance)
+				{
+					id = i+1;
+					distance = iDistance;
+				}
+			}
+			else
+			{
+				System.out.println("Elevator "+id+" is currently moving.");
+				id = id+1;
+				allElevatorsBusy++;
+			}
+			
+			i++;
+			if(i == 4)
+			{
+				break;
+			}
+		}
+		
+		//Seeing if all elevators have passengers.
+		if(allElevatorsBusy == 4)
+		{
+			System.out.println("All elevators are currently moving");
+		}
+		allElevatorsBusy = 0;
+		
+		System.out.println("The id of the elevator to move is: "+id);
+		elevatorToMove = Integer.toString(id);
+		
+		/** Old code for scheduler
 		System.out.print(elevators[0] + "\n" + elevators[1] + "\n" + elevators[2] + "\n" + elevators[3] + "\n");
 		String[] data1 = elevators[0].split("\\|");
 		String[] data2 = elevators[1].split("\\|");
@@ -182,9 +233,7 @@ public class Scheduler{
 				distance = iDistance;
 			}
 		}
-		
-		System.out.println("The id of the elevator to move is: "+id);
-		elevatorToMove = Integer.toString(id);
+		*/
 	}
 	
 	/*
@@ -216,37 +265,6 @@ public class Scheduler{
 		}
 		
 		System.out.println("Scheduler: Packet sent to ElevatorSubsystem.\n");
-	}
-	
-	/*
-	 * Waits to receive information from the server.
-	 */
-	private void receiveFromElevatorSubsystem()
-	{
-		// Construct a DatagramPacket for receiving packets up 
-		// to 100 bytes long (the length of the byte array).
-		byte data[] = new byte[100];
-		serverPacket = new DatagramPacket(data, data.length);
-		
-		// Block until a datagram packet is received from receiveSocket.
-		try {        
-			System.out.println("Waiting for response from ElevatorSubsystem..."); // so we know we're waiting
-			sendReceiveSocket.receive(serverPacket);
-		} catch (IOException e) {
-			System.out.print("IO Exception: likely:");
-			System.out.println("Receive Socket Timed Out.\n" + e);
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		// Process the received datagram.
-		System.out.println("Scheduler: Packet received from ElevatorSubsystem:");
-		System.out.println("From ElevatorSubsystem: " + serverPacket.getAddress());
-		System.out.println("ElevatorSubsystem port: " + serverPacket.getPort());
-		int len = serverPacket.getLength();
-		System.out.println("Length: " + len);
-		System.out.print("Containing: "); 
-		System.out.println(String.valueOf(data[0])+String.valueOf(data[1])+String.valueOf(data[2])+String.valueOf(data[3]));
 	}
 	
 	/*

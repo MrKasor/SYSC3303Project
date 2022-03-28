@@ -125,7 +125,7 @@ public class ElevatorSubsystem {
 		
 		int incr = 1;
 		for (int i = 0; i < NUM_ELE; i++) {
-			Thread tempThread = new Thread(new Elevator(i+1, eleSystem), "Elevator: "+(i+1));
+			Thread tempThread = new Thread(new Elevator(i+1, incr, eleSystem), "Elevator: "+(i+1));
 			tempThread.start();
 			eleSystem.updateData(i+1, i+1+"|"+incr+"|0|0|0");
 			incr += 6;
