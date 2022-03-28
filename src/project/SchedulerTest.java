@@ -28,6 +28,8 @@ class SchedulerTest {
 
     @Test
     void receivePacketFloorSubsystem() {
+        //This method tests the scheduler's receive method. The floor sends packet to the scheduler and this method
+        // confirms if the data is sent or not
         String data = "10000000 1 up 4";
         floor.send(data, 5000, 1);
         scheduler.receivePacketFloorSubsystem();
@@ -38,6 +40,8 @@ class SchedulerTest {
 
     @Test
     void sendToElevatorSubsystem() {
+        //The floor sends to the scheduler, the scheduler sends to the elevator subsystem and this method tests if the
+        // packet is received by the elevator subsystem.
         String data = "10000000 1 up 4";
         floor.send(data, 5000, 1);
         scheduler.receivePacketFloorSubsystem();
@@ -49,27 +53,22 @@ class SchedulerTest {
         assertEquals(data, receivedData);
     }
 
-    @Test
-    void receiveFromElevatorSubsystem() {
-        eleSub.sendDataList();
-        scheduler.receiveFromElevatorSubsystem();
-        assertTrue(scheduler.getServerPacket() != null);
-    }
 
     @Test
     void sendToFloorSubsystem() {
+        //The floor sends to the scheduler, the scheduler sends back to the floor subsystem and this method tests if the
+        // packet is received by the floor subsystem.
         String data = "10000000 1 up 4";
         floor.send(data, 5000, 1);
-        scheduler.receivePacketFloorSubsystem();
-        eleSub.sendDataArrived();
-        scheduler.receiveFromElevatorSubsystem();
+        scheduler.requestElevatorLocations();
+        eleSub.sendDataList();
+        scheduler.requestElevatorLocations();
         scheduler.sendToFloorSubsystem();
 
         floor.receive();
         int len = floor.packetData().getLength();
         System.out.println(floor.packetData().getData());
         String receivedData = new String(floor.packetData().getData(), 0, len);
-        System.out.println(receivedData);
         assertTrue(floor.packetData().getData() != null);
     }
 }

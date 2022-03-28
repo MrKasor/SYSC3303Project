@@ -1,6 +1,3 @@
-/**
- * 
- */
 package project;
 
 import java.io.File;
@@ -13,6 +10,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 import java.util.ArrayList;
+
+
 
 /**
  * @author Colton, Ryan
@@ -50,7 +49,7 @@ public class Floor{
     * @param data
     * @param port
     */
-   private void send(String data, int port, int type)
+   public void send(String data, int port, int type)
    {
 	   //Find length of message
 	   int length = data.getBytes().length;
@@ -88,7 +87,7 @@ public class Floor{
        System.out.println("FloorSubsystem: Packet sent.\n");
    }
    
-   private void receive()
+   public void receive()
    {
 	   // Construct a DatagramPacket for receiving packets up 
        // to 100 bytes long (the length of the byte array).
@@ -163,5 +162,8 @@ public class Floor{
 		
 		
 	}
-	
+
+	public DatagramPacket packetData() {
+		return receivePacket;
+	}
 }

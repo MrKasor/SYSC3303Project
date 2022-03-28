@@ -23,7 +23,8 @@ public class Elevator implements Runnable{
 	 * Constructor for Elevator. Starts an Elevator thread.
 	 * 
 	 * @param id
-	 * @param netRef
+	 * @param floor
+	 * @param sysRef
 	 */
 	public Elevator(int id, int floor, ElevatorSubsystem sysRef) {
 		this.id=id;

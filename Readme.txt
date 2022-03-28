@@ -1,5 +1,9 @@
 Iteration 4:
 
+To Run:
+Run Scheduler.java then ElevatorSubsystems.java then Floor.java in that order.
+Run test classes as JUnit Tests
+
 TEAM MEMBERS:
 - Colton North
 - Rami Haddad
@@ -21,6 +25,7 @@ Ryan Kasor
 - Created helper class for Socket use called PacketHelper.
 - Setup the reading of input.txt in Floor Class.
 - Setup state machine in Elevator Class.
+- Fixed a few errors with merging.
 
 Osas Iyamu
 - Created ElevatorSubsystemTest.java
@@ -30,5 +35,5 @@ Osas Iyamu
 - Sequence Diagram
 
 Rami Haddad
-- Class Diagram
-- State Machine Diagram
+- UML Class Diagram
+- Elevator State Machine Diagram

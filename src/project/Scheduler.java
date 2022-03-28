@@ -1,8 +1,6 @@
-/**
- * 
- */
 package project;
 
+import javax.xml.crypto.Data;
 import java.awt.Taskbar.State;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -12,7 +10,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import project.Elevator.ElevatorState;
 
 /**
  * @author Colton
@@ -51,7 +48,15 @@ public class Scheduler{
 			System.exit(1);
 		}
 	}
-	
+
+	public DatagramPacket getPacketData() {
+		return receivePacket;
+	}
+
+	public DatagramPacket getServerPacket() {
+		return serverPacket;
+	}
+
 	public enum SchedulerState
 	{
 		WaitingForButtonPress,
@@ -64,7 +69,7 @@ public class Scheduler{
 	/**
 	 * receive a packet from the floor subsystem.
 	 */
-	private void receivePacketFloorSubsystem()
+	public void receivePacketFloorSubsystem()
 	{
 		// Construct a DatagramPacket for receiving packets up 
 		// to 100 bytes long (the length of the byte array).
@@ -108,7 +113,7 @@ public class Scheduler{
 	/*
 	 * This function determines which elevator will be selected to pick up the passengers.
 	 */
-	private void requestElevatorLocations()
+	public void requestElevatorLocations()
 	{	
 		byte data[] = new byte[100];
 		data[0] = 1;
@@ -239,7 +244,7 @@ public class Scheduler{
 	/*
 	 * Transfers the FloorSubsystem information over to the ElevatorSubsystem.
 	 */
-	private void sendToElevatorSubsystem()
+	public void sendToElevatorSubsystem()
 	{
 		 //Create byte array and assign first byte to 0.
 		 byte[] toSend = new byte[100];
@@ -270,7 +275,7 @@ public class Scheduler{
 	/*
 	 * Sends the information from the server over to the client.
 	 */
-	private void sendToFloorSubsystem()
+	public void sendToFloorSubsystem()
 	{
 		String floorInfo= "Elevator " + elevatorToMove + " is on its way...";
 		

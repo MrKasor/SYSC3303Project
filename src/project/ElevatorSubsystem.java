@@ -1,8 +1,8 @@
 package project;
+
 import java.net.*;
 import java.util.*;
 
-import project.Elevator.ElevatorState;
 
 /**
  * 
@@ -35,7 +35,7 @@ public class ElevatorSubsystem {
 	}
 	
 	//When a floor needs a elevator
-	private void receivePacketOne() {
+	public void receivePacketOne() {
 		System.out.println("Waiting for packet from Scheduler...");
         receivePacket = helper.receivePacket(socket);
         helper.print(receivePacket, "Elevator Subsystem", "received from Scheduler");
@@ -59,7 +59,7 @@ public class ElevatorSubsystem {
     }
 	
 	//Convert the message into a byte array then send it
-	private void sendDataList() {
+	public void sendDataList() {
 		byte[] data = formatDataList();
 		sendPacket = helper.sendPacket(socket, data, SCH_PORT);
 		helper.print(sendPacket, "Elevator Subsystem", "sent to Scheduler");
@@ -136,4 +136,11 @@ public class ElevatorSubsystem {
 		}
 	}
 
+	public DatagramSocket getSocket() {
+		return socket;
+	}
+
+	public DatagramPacket packetData() {
+		return receivePacket;
+	}
 }
