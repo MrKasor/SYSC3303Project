@@ -24,17 +24,30 @@ public class Floor{
 	
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendReceiveSocket;
+	private int elePort;
+	private int schPort;
+	private int floorPort;
+	private int GUIPort;
+	private int numFloors;
+	private String inputFileName;
 	
 	/**
 	 * Floor Constructor
 	 */
-	public Floor()
-    {
+	public Floor(Config config){
+		//Import config File Properties
+		numFloors = config.getIntProperty("numFloors");
+		inputFileName = config.getStrProperty("inputFileName");
+		elePort = config.getIntProperty("elePort");
+		schPort = config.getIntProperty("schPort");
+		floorPort = config.getIntProperty("floorPort");
+		GUIPort = config.getIntProperty("GUIPort");
+		
        try {
           // Construct a datagram socket and bind it to any available 
           // port on the local host machine. This socket will be used to
           // send and receive UDP Datagram packets.
-          sendReceiveSocket = new DatagramSocket();
+          sendReceiveSocket = new DatagramSocket(floorPort);
        } catch (SocketException se) {   // Can't create the socket.
           se.printStackTrace();
           System.exit(1);
@@ -113,6 +126,19 @@ public class Floor{
        System.out.println(new String(receivePacket.getData()));
        System.out.println("\n");
    }
+   
+   public int getSchPort() {
+	   return schPort;
+   }
+   public int getElePort() {
+	   return elePort;
+   }
+   public int getGUIPort() {
+	   return GUIPort;
+   }
+   public int getFloorPort() {
+	   return floorPort;
+   }
 	
 	/**
 	 * Reads input from a text file, and stores it in an ArrayList
@@ -124,7 +150,7 @@ public class Floor{
 		ArrayList<String> data = new ArrayList<String>();
 		
 		try {
-	        File file = new File("input.txt");
+	        File file = new File(inputFileName);
 	
 	        Scanner input = new Scanner(file);
 	
@@ -141,13 +167,13 @@ public class Floor{
 		return data;
 	}
 	
-	public static void main(String args[])
-	{
-		Floor c = new Floor();
+	public static void main(String args[]) throws IOException{
+		Config config = new Config();
+		Floor c = new Floor(config);
 		
 		for(String d: data)
 		{
-			c.send(d, 5000, 1);
+			c.send(d, c.getSchPort(), 1);
 			c.receive();
 			try {
 				Thread.sleep(3000);

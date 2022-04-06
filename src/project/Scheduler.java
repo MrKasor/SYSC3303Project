@@ -29,15 +29,23 @@ public class Scheduler{
 
 	DatagramPacket sendPacket, receivePacket, serverPacket;
 	DatagramSocket sendReceiveSocket, receiveSocket;
+	private int elePort;
+	private int schPort;
+	private int floorPort;
+	private int GUIPort;
 	
-	public Scheduler()
-	{
+	public Scheduler(Config config){
+		elePort = config.getIntProperty("elePort");
+		schPort = config.getIntProperty("schPort");
+		floorPort = config.getIntProperty("floorPort");
+		GUIPort = config.getIntProperty("GUIPort");
+		
 		try {
 			
 			// Construct a datagram socket and bind it to port 5000 
 			// on the local host machine. This socket will be used to
 			// receive UDP Datagram packets.
-			receiveSocket = new DatagramSocket(5000);
+			receiveSocket = new DatagramSocket(schPort);
 			
 			// Construct a datagram socket and bind it to any available 
 			// port on the local host machine. This socket will be used to
@@ -119,7 +127,7 @@ public class Scheduler{
 		data[0] = 1;
 		//prepare a packet to send to server for a request to find the location of the elevators
 		try {
-			sendPacket = new DatagramPacket(data, data.length, InetAddress.getLocalHost(), 5002);
+			sendPacket = new DatagramPacket(data, data.length, InetAddress.getLocalHost(), elePort);
 		} catch (UnknownHostException e) {
 	         e.printStackTrace();
 	         System.exit(1);
@@ -255,7 +263,7 @@ public class Scheduler{
 		
 		//prepare the packet to send to server
 		try {
-			sendPacket = new DatagramPacket(toSend, toSend.length, InetAddress.getLocalHost(), 5002);
+			sendPacket = new DatagramPacket(toSend, toSend.length, InetAddress.getLocalHost(), elePort);
 		} catch (UnknownHostException e) {
 	         e.printStackTrace();
 	         System.exit(1);
@@ -303,9 +311,10 @@ public class Scheduler{
 		System.out.println("Scheduler: Packet sent to FloorSubsystem.\n");
 	}
 	
-    public static void main(String[] args) 
-	{
-		Scheduler scheduler = new Scheduler();
+    public static void main(String[] args) throws IOException{
+    	Config config = new Config();
+		Scheduler scheduler = new Scheduler(config);
+		
 		while(true)
 		{
 			switch (state)

@@ -1,9 +1,5 @@
 Iteration 4:
 
-To Run:
-Run Scheduler.java then ElevatorSubsystems.java then Floor.java in that order.
-Run test classes as JUnit Tests
-
 TEAM MEMBERS:
 - Colton North
 - Rami Haddad
@@ -18,7 +14,6 @@ Colton North
 - Updated Elevator class with another state, and updated the timing it takes for elevators to move floors, as well as the information they transmit.
 - Updated Floor Class so that it will send all values in input.txt.
 - Updated input.txt to request multiple times (3).
-- Scheduler State Diagram
 
 Ryan Kasor
 - Created basis for the Elevator Class.
@@ -26,7 +21,6 @@ Ryan Kasor
 - Created helper class for Socket use called PacketHelper.
 - Setup the reading of input.txt in Floor Class.
 - Setup state machine in Elevator Class.
-- Fixed a few errors with merging.
 
 Osas Iyamu
 - Created ElevatorSubsystemTest.java
@@ -36,5 +30,5 @@ Osas Iyamu
 - Sequence Diagram
 
 Rami Haddad
-- UML Class Diagram
-- Elevator State Machine Diagram
+- Class Diagram
+- State Machine Diagram
