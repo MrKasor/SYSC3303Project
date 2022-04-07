@@ -41,8 +41,6 @@ public class Scheduler{
 		schPort = config.getIntProperty("schPort");
 		floorPort = config.getIntProperty("floorPort");
 		GUIPort = config.getIntProperty("GUIPort");
-		stuckElevator = config.getIntProperty("eleStuck");
-		stuckDoor = config.getIntProperty("eleDoorStuck");
 		
 		try {
 			
@@ -295,7 +293,7 @@ public class Scheduler{
 	 */
 	public void sendToFloorSubsystem()
 	{
-		String floorInfo= "Elevator " + elevatorToMove + " is on its way...";
+		String floorInfo= floorDestination+"|"+elevatorToMove+"|1";
 		
 		//Create byte array and assign first byte to 0.
 		 byte[] toSend = new byte[100];
