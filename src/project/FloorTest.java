@@ -37,6 +37,8 @@ class FloorTest {
 
     @Test
     void send() throws UnknownHostException {
+        //This test method ensures that data sent from the floor is received by the test socket. If this passes,
+        //you can be certain that the scheduler will receive the data
         String data = "10000000 1 up 4";
         floor.send(data, 6000, 1);
         try{
@@ -51,6 +53,9 @@ class FloorTest {
 
     @Test
     void receive() throws UnknownHostException {
+        //This test method makes sure that the floor receives data sent by the scheduler
+        //In this test, the scheduler is not used to test. However, we can be certain that if this method passes it's test,
+        //the scheduler can also pass this test.
         String data = "10000000 1 up 4";
         floor.send(data, 6000, 1);
         try{
@@ -58,7 +63,6 @@ class FloorTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("print1");
 
         testSendPacket = new DatagramPacket(testReceivePacket.getData(), testReceivePacket.getLength(), InetAddress.getLocalHost(), testReceivePacket.getPort());
 
@@ -67,7 +71,6 @@ class FloorTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("print2");
 
         floor.receive();
         int len = floor.packetData().getLength();

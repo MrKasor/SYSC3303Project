@@ -17,18 +17,27 @@ public class Elevator implements Runnable{
 	private int floor;
 	private boolean hasPeople = false;
 	private boolean boarding = true;
+	private Door door;
+	private Motor motor;
+	private ElevatorLamp lamp;
+	private ElevatorButton button;
 	
 	
 	/**
 	 * Constructor for Elevator. Starts an Elevator thread.
 	 * 
 	 * @param id
-	 * @param netRef
+	 * @param floor
+	 * @param sysRef
 	 */
 	public Elevator(int id, int floor, ElevatorSubsystem sysRef) {
 		this.id=id;
 		this.floor=floor;
 		this.sysRef=sysRef;
+		door = new Door(id, false, false);
+		motor = new Motor(id, false, false);
+		lamp = new ElevatorLamp(id, false);
+		button = new ElevatorButton(id, false);
 	}
 	
 	
@@ -53,12 +62,14 @@ public class Elevator implements Runnable{
 					//System.out.println("Elevator "+id+" is currently waiting for further instruction...");
 					nextFloor = sysRef.send(id);
 					destination = sysRef.getDestinationFloor();
-					
+					door.close();
 					if(nextFloor > floor) {//Going up
 						temp = id+"|"+nextFloor+"|1|0|0";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
+						motor.elevatorGoingUp();
 					}
 					else {//Going Down
 						temp = id+"|"+nextFloor+"|1|0|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
+						motor.elevatorGoingDown();
 					}
 					System.out.println("Elevator "+id+": moving to floor "+nextFloor);
 					sysRef.updateData(id, temp); //update that elevator is moving
@@ -72,6 +83,8 @@ public class Elevator implements Runnable{
 						hasPeople = true;
 						System.out.println("\nElevator "+id+": stopped, people are boarding.\n");
 						boarding = false;
+						button.elevatorButtonPressed();
+						lamp.turnElevatorLampOn();
 					}
 					else
 					{
@@ -120,18 +133,26 @@ public class Elevator implements Runnable{
 					}
 					
 					System.out.println("Elevator " +id+": has arrived at floor "+nextFloor+".");
+					motor.elevatorArrived();
+					door.open();
 					state = ElevatorState.Stopped;
 					break;
 					
 				case MovingToDestination:
 					System.out.println("Elevator "+id+": Bringing passengers to floor "+destination+".");
+					door.close();
 					timing = 0;
 					if(destination > nextFloor)
 					{
 						timing = destination - nextFloor;
+						motor.elevatorGoingUp();
 					}
 					else
+					{
 						timing = nextFloor - destination;
+						motor.elevatorGoingDown();
+					}
+						
 					try {
 						Thread.sleep(timing * 2000);
 					} catch (InterruptedException e) {
@@ -141,6 +162,8 @@ public class Elevator implements Runnable{
 					floor = destination;
 					sysRef.updateData(id, temp);
 					System.out.println("Elevator " +id+": arrived at floor "+destination+".");
+					motor.elevatorArrived();
+					door.open();
 					state = ElevatorState.Stopped;
 					break;
 			}

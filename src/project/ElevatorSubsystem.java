@@ -1,8 +1,9 @@
 package project;
+
+import java.io.IOException;
 import java.net.*;
 import java.util.*;
 
-import project.Elevator.ElevatorState;
 
 /**
  * 
@@ -14,20 +15,36 @@ public class ElevatorSubsystem {
 	private DatagramSocket socket;
 	private DatagramPacket receivePacket, sendPacket;
 	private PacketHelper helper = new PacketHelper();
-	private static final int ELE_PORT = 5002;
-	private static final int SCH_PORT = 5000;
-	private static final int NUM_ELE = 4;
-	private int nextEle = 0;
-	private int nextFloor = 0;
-	public int destinationFloor = 0;
-	private int arrivedEle = 0;
-	private int arrivedFloor = 0;
+	private int elePort;
+	private int schPort;
+	private int floorPort;
+	private int GUIPort;
+	private int numEle;
+	private int nextEle;
+	private int nextFloor;
+	private int destinationFloor;
+	private int arrivedEle;
+	private int arrivedFloor;
 	private Map<Integer, String> eleList = new HashMap<>();
 	
 	//Server Socket on port 5000
-	public ElevatorSubsystem() {
+	public ElevatorSubsystem(Config config) {
+		//Import config File Properties
+		numEle = config.getIntProperty("numEle");
+		elePort = config.getIntProperty("elePort");
+		schPort = config.getIntProperty("schPort");
+		floorPort = config.getIntProperty("floorPort");
+		GUIPort = config.getIntProperty("GUIPort");
+		
+		//Init
+		nextEle = 0;
+		nextFloor = 0;
+		destinationFloor = 0;
+		arrivedEle = 0;
+		arrivedFloor = 0;
+		
 		try {
-			socket = new DatagramSocket(ELE_PORT);
+			socket = new DatagramSocket(elePort);
 		} catch(SocketException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -35,7 +52,7 @@ public class ElevatorSubsystem {
 	}
 	
 	//When a floor needs a elevator
-	private void receivePacketOne() {
+	public void receivePacketOne() {
 		System.out.println("Waiting for packet from Scheduler...");
         receivePacket = helper.receivePacket(socket);
         helper.print(receivePacket, "Elevator Subsystem", "received from Scheduler");
@@ -59,9 +76,9 @@ public class ElevatorSubsystem {
     }
 	
 	//Convert the message into a byte array then send it
-	private void sendDataList() {
+	public void sendDataList() {
 		byte[] data = formatDataList();
-		sendPacket = helper.sendPacket(socket, data, SCH_PORT);
+		sendPacket = helper.sendPacket(socket, data, schPort);
 		helper.print(sendPacket, "Elevator Subsystem", "sent to Scheduler");
 	}
 	
@@ -109,6 +126,10 @@ public class ElevatorSubsystem {
 		return destinationFloor;
 	}
 	
+	public int getNumEle() {
+		return numEle;
+	}
+	
 	//Order that the methods run in
 	public void run() {
 		receivePacketOne();
@@ -118,13 +139,15 @@ public class ElevatorSubsystem {
 
 	/**
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
-		ElevatorSubsystem eleSystem = new ElevatorSubsystem();
+	public static void main(String[] args) throws IOException {
+		Config config = new Config();
+		ElevatorSubsystem eleSystem = new ElevatorSubsystem(config);
 		System.out.println("Elevator System started");
 		
 		int incr = 1;
-		for (int i = 0; i < NUM_ELE; i++) {
+		for (int i = 0; i < eleSystem.getNumEle(); i++) {
 			Thread tempThread = new Thread(new Elevator(i+1, incr, eleSystem), "Elevator: "+(i+1));
 			tempThread.start();
 			eleSystem.updateData(i+1, i+1+"|"+incr+"|0|0|0");
@@ -136,4 +159,11 @@ public class ElevatorSubsystem {
 		}
 	}
 
+	public DatagramSocket getSocket() {
+		return socket;
+	}
+
+	public DatagramPacket packetData() {
+		return receivePacket;
+	}
 }

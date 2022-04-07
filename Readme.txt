@@ -14,11 +14,17 @@ Colton North
 - Updated Elevator class with another state, and updated the timing it takes for elevators to move floors, as well as the information they transmit.
 - Updated Floor Class so that it will send all values in input.txt.
 - Updated input.txt to request multiple times (3).
+- Updated Scheduler to account for elevators that are stuck.
+- Created Motor, ElevatorLamp, ElevatorButton, and Door classes.
+- Updated Elevator class to include the functionality of the new classes.
 
 Ryan Kasor
 - Created basis for the Elevator Class.
 - Reworked the ElevatorSubsystem Class to use Sockets.
 - Created helper class for Socket use called PacketHelper.
+- Created helper class for Config Files called Config to allow config file use.
+- Split the FloorSubsystem from the Basic Floor Class.
+- Created the FloorLamp/FloorButton.
 - Setup the reading of input.txt in Floor Class.
 - Setup state machine in Elevator Class.
 
