@@ -22,9 +22,13 @@ public class GUI extends JFrame{
 	private List<JTextPane> floorDirection = new ArrayList<JTextPane>();
 	private List<JPanel> elePanel = new ArrayList<JPanel>();
 	private List<JPanel> floorLamp = new ArrayList<JPanel>();
+
 	private int GUIPort;
 	private JTextPane scheduler;
 	private Config config;
+	private int elePort;
+	private JTextPane scheduler;
+
 
 	/**
 	 * Launch the application.
@@ -39,6 +43,8 @@ public class GUI extends JFrame{
 			public void run() {
 				try {
 					frame.receive();
+					Thread.sleep(1000);
+					frame.updateEle(1);
 					frame.repaint();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -52,13 +58,21 @@ public class GUI extends JFrame{
 	 * @throws IOException 
 	 */
 	public GUI() throws IOException {
+
 		config = new Config();
-		
 		GUIPort = config.getIntProperty("GUIPort");
 		
 		//Socket
 		try {
 			socket = new DatagramSocket(GUIPort);
+
+		Config config = new Config();
+		
+		elePort = config.getIntProperty("elePort");
+		
+		//Socket
+		try {
+			socket = new DatagramSocket(elePort);
 		} catch(SocketException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -236,6 +250,17 @@ public class GUI extends JFrame{
 	
 	/*
 	public void updateEle(int id) {
+	//When a floor needs a elevator
+	public void receiveEle() {
+        receivePacket = helper.receivePacket(socket);
+        //helper.print(receivePacket, "Elevator Subsystem", "received from Scheduler");
+        
+        System.out.println("\nContaining: " + new String(receivePacket.getData()) +"\n");
+    }
+	
+	public void updateEle(int id) throws IOException {
+		Config config = new Config();
+		
 		int eleNumber = id-1; //Floor index
 		int chooseFloor = 4; //Floor to go to
 		int actualFloor = config.getIntProperty("numFloors") - (chooseFloor); //Floor FOR CALCS
@@ -249,4 +274,8 @@ public class GUI extends JFrame{
 		elePanel.get(eleNumber).setBounds(eleLocX + (config.getIntProperty("eleGUI") * eleNumber ), eleLocY, 25, 25);
 	}
 	*/
+
+		elePanel.get(eleNumber).setBackground(Color.BLACK);
+	}
+
 }
