@@ -22,29 +22,23 @@ public class GUI extends JFrame{
 	private List<JTextPane> floorDirection = new ArrayList<JTextPane>();
 	private List<JPanel> elePanel = new ArrayList<JPanel>();
 	private List<JPanel> floorLamp = new ArrayList<JPanel>();
-	private int elePort;
+	private int GUIPort;
 	private JTextPane scheduler;
+	private Config config;
 
 	/**
 	 * Launch the application.
 	 * @throws IOException 
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException{
 		GUI frame = new GUI();
 		frame.setVisible(true);
 		frame.setTitle("Elevator System - Group 8");
 		
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Thread.sleep(1000);
-					frame.updateEle(1);
-					frame.repaint();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		while(true) {
+			frame.receive();
+			frame.repaint();
+		}
 	}
 
 	/**
@@ -52,13 +46,13 @@ public class GUI extends JFrame{
 	 * @throws IOException 
 	 */
 	public GUI() throws IOException {
-		Config config = new Config();
+		config = new Config();
 		
-		elePort = config.getIntProperty("elePort");
+		GUIPort = config.getIntProperty("GUIPort");
 		
 		//Socket
 		try {
-			socket = new DatagramSocket(elePort);
+			socket = new DatagramSocket(GUIPort);
 		} catch(SocketException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -140,17 +134,102 @@ public class GUI extends JFrame{
 		contentPane.add(scheduler);
 	}
 	
-	//When a floor needs a elevator
-	public void receiveEle() {
+	public void eleSim(String data){
+		System.out.println(data);
+		String elevatorsStatus[] = data.trim().split(";");
+		
+		//Data
+		int id;
+		int destFloor;
+		int direction;
+		int curFloor;
+		int state;
+		
+		int eleLocX;
+		int eleLocY;
+		
+		for(String elevator : elevatorsStatus){
+			System.out.println(elevator);
+			elevator = elevator.replace(";", "");
+		}
+		
+		for(String elevator : elevatorsStatus){
+			String temp[] = elevator.trim().split("\\|");
+			
+			
+			System.out.println("ID: "+temp[0]);
+			System.out.println("DesFloor: "+temp[1]);
+			System.out.println("Direction: "+temp[4]);
+			System.out.println("CurFloor: "+temp[5]);
+			System.out.println("State: "+temp[6]);
+			
+			
+			id = Integer.parseInt(temp[0]);
+			destFloor = Integer.parseInt(temp[1]);
+			direction = Integer.parseInt(temp[4]);
+			curFloor = Integer.parseInt(temp[5]);
+			temp[6] = temp[6].replace(";", "");
+			state = Integer.parseInt(temp[6]);
+			
+			eleLocX = 180;
+			eleLocY = (config.getIntProperty("floorGUI") * (config.getIntProperty("numFloors") - (curFloor) + 1)) - 15;
+			
+			//Floors
+			if(state != 0) { //Turn ON Floors DOESNT WORK
+				floorLamp.get(config.getIntProperty("numFloors") - (destFloor + 3)).setBackground(Color.ORANGE);;
+				if(direction==0) {
+					floorDirection.get(config.getIntProperty("numFloors") - (destFloor)).setText("UP");
+				}else if(direction==1){
+					floorDirection.get(config.getIntProperty("numFloors") - (destFloor)).setText("DOWN");
+				}
+			}else { //Turn OFF Floors
+				floorLamp.get(config.getIntProperty("numFloors") - (destFloor)).setBackground(Color.WHITE);;
+				floorDirection.get(config.getIntProperty("numFloors") - (destFloor)).setText("");
+			}
+			
+			//Elevator Current Floor
+			eleFloor.get(id-1).setText("Floor " + curFloor);
+			elePanel.get(id-1).setBounds(eleLocX + (config.getIntProperty("eleGUI") * (id - 1) ), eleLocY, 25, 25);
+			
+			if(state == 1) {
+				eleText.get(id-1).setText("Moving to Pickup at Floor "+destFloor);
+			}
+			else if(state == 2) {
+				eleText.get(id-1).setText("Opening Doors");
+			}
+			else if(state == 3) {
+				eleText.get(id-1).setText("Passengers are getting on and picking a Destination");
+			}
+			else if(state == 4) {
+				eleText.get(id-1).setText("Closing Doors");
+			}
+			else if(state == 5) {
+				eleText.get(id-1).setText("Moving to Destination Floor "+destFloor);
+			}
+			else if(state == 6) {
+				eleText.get(id-1).setText("Passengers are getting off");
+			}
+			else if(state == 7) {
+				eleText.get(id-1).setText("Elevator Error");
+			}
+		}	
+	}
+	
+	public void schSim(String data) {
+		String temp[] = data.trim().split("\\|");
+		
+		int state = Integer.parseInt(temp[0]);
+		String Message = temp[1];
+	}
+	
+	//Recieve packet
+	public void receive() {
         receivePacket = helper.receivePacket(socket);
-        //helper.print(receivePacket, "Elevator Subsystem", "received from Scheduler");
-        
-        System.out.println("\nContaining: " + new String(receivePacket.getData()) +"\n");
+        eleSim(new String(receivePacket.getData()));
     }
 	
-	public void updateEle(int id) throws IOException {
-		Config config = new Config();
-		
+	/*
+	public void updateEle(int id) {
 		int eleNumber = id-1; //Floor index
 		int chooseFloor = 4; //Floor to go to
 		int actualFloor = config.getIntProperty("numFloors") - (chooseFloor); //Floor FOR CALCS
@@ -162,6 +241,6 @@ public class GUI extends JFrame{
 		eleFloor.get(eleNumber).setText("Floor " + chooseFloor);
 		eleText.get(eleNumber).setText("Elevator is unloading");
 		elePanel.get(eleNumber).setBounds(eleLocX + (config.getIntProperty("eleGUI") * eleNumber ), eleLocY, 25, 25);
-		elePanel.get(eleNumber).setBackground(Color.BLACK);
 	}
+	*/
 }

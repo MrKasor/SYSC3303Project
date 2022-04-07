@@ -68,7 +68,6 @@ public class FloorSubsystem{
     * @param port
     */
    public void send(String data, int port, int type){
-	   
 	   String temp[] = data.trim().split(" ");
 	   if(temp[2].equalsIgnoreCase("up")) {
 		   isRequesting.put(Integer.parseInt(temp[1]),true);
@@ -240,18 +239,21 @@ public class FloorSubsystem{
 	   return floorPort;
    }
 	
-	public static void main(String args[]) throws IOException{
-		Config config = new Config();
-		FloorSubsystem c = new FloorSubsystem(config);
-		
-		for(String d: data){
-			c.send(d, c.getSchPort(), 1);
-			c.receive();
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+   public static void main(String args[]) throws IOException{
+       Config config = new Config();
+       FloorSubsystem c = new FloorSubsystem(config);
+
+       long startTime = System.currentTimeMillis();
+
+       for(String d: data){
+           c.send(d, c.getSchPort(), 1);
+           c.receive();
+           try {
+               Thread.sleep(3000);
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+       }
+       System.out.println("Time elapsed: "+(System.currentTimeMillis() - startTime)+ "ms");
+   }
 }
