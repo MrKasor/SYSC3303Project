@@ -84,7 +84,6 @@ public class ElevatorSubsystem {
 	
 	//Format a list to send to the scheduler
 	private byte[] formatDataList() {
-		int size = 2;
 		String temp = "";
 			
 		for (Map.Entry mapElement : eleList.entrySet()) {
@@ -104,7 +103,10 @@ public class ElevatorSubsystem {
 	
 	//Elevators use this to update the hashmap of elevator locations
 	synchronized void updateData(int id, String info) {
-		eleList.put(id, info);
+        byte[] data = formatDataList();
+        sendPacket = helper.sendPacket(socket, data, GUIPort);
+        
+        eleList.put(id, info);
         
         notifyAll();
 	}
@@ -130,6 +132,7 @@ public class ElevatorSubsystem {
 		return numEle;
 	}
 	
+	
 	//Order that the methods run in
 	public void run() {
 		receivePacketOne();
@@ -142,22 +145,23 @@ public class ElevatorSubsystem {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		Config config = new Config();
-		ElevatorSubsystem eleSystem = new ElevatorSubsystem(config);
-		System.out.println("Elevator System started");
-		
-		int incr = 1;
-		for (int i = 0; i < eleSystem.getNumEle(); i++) {
-			Thread tempThread = new Thread(new Elevator(i+1, incr, eleSystem), "Elevator: "+(i+1));
-			tempThread.start();
-			eleSystem.updateData(i+1, i+1+"|"+incr+"|0|0|0");
-			incr += 6;
+        Config config = new Config();
+        ElevatorSubsystem eleSystem = new ElevatorSubsystem(config);
+        System.out.println("Elevator System started");
+        System.out.println("Number of Elevators: "+eleSystem.getNumEle());
+
+        int incr = 1;
+        for (int i = 0; i < eleSystem.getNumEle(); i++) {
+            Thread tempThread = new Thread(new Elevator(i+1, incr, eleSystem), "Elevator: "+(i+1));
+            tempThread.start();
+            eleSystem.updateData(i+1, i+1+"|"+incr+"|0|0|0|0|0");
+            incr += 6;
         }
 
-		while(true) {
-			eleSystem.run();
-		}
-	}
+        while(true) {
+            eleSystem.run();
+        }
+    }
 
 	public DatagramSocket getSocket() {
 		return socket;
