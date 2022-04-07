@@ -19,6 +19,9 @@ Ryan Kasor
 - Created basis for the Elevator Class.
 - Reworked the ElevatorSubsystem Class to use Sockets.
 - Created helper class for Socket use called PacketHelper.
+- Created helper class for Config Files called Config to allow config file use.
+- Split the FloorSubsystem from the Basic Floor Class.
+- Created the FloorLamp/FloorButton.
 - Setup the reading of input.txt in Floor Class.
 - Setup state machine in Elevator Class.
 
