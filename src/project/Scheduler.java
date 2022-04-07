@@ -23,6 +23,8 @@ public class Scheduler{
 	int requestFloor;
 	String direction;
 	int floorDestination;
+	int stuckElevator;
+	int stuckDoor;
 	
 	String[] elevatorsStatus = new String[4];
 	String elevatorToMove;
@@ -174,14 +176,23 @@ public class Scheduler{
 		
 		//Choosing which elevator to send to pick up passengers.
 		int i = 0;
-		int num = 999999;
-		int distance = 0;
+		int num = 0;
+		int distance = 99999;
 		int id = 1;
 		int allElevatorsBusy = 0;
 		for(String elevator : elevatorsStatus)
 		{
 			String[] temp = elevator.split("\\|");
 			num = Integer.parseInt(temp[1]);
+			
+			if(Integer.parseInt(temp[0]) == stuckElevator)
+			{
+				i++;
+				allElevatorsBusy++;
+				System.out.println("Elevator "+stuckElevator+" is stuck.");
+				continue;
+			}
+			
 			if(i == 0)
 			{
 				distance = Math.abs(num - requestFloor);
@@ -198,8 +209,6 @@ public class Scheduler{
 			}
 			else
 			{
-				System.out.println("Elevator "+id+" is currently moving.");
-				id = id+1;
 				allElevatorsBusy++;
 			}
 			
@@ -214,12 +223,38 @@ public class Scheduler{
 		if(allElevatorsBusy == 4)
 		{
 			System.out.println("All elevators are currently moving");
+			id = 1;
+			distance = 99999;
+			for(String elevator : elevatorsStatus)
+			{
+				String[] temp = elevator.split("\\|");
+				num = Integer.parseInt(temp[1]);
+				
+				if(Integer.parseInt(temp[0]) == stuckElevator)
+				{
+					i++;
+					allElevatorsBusy++;
+					System.out.println("Elevator "+stuckElevator+" is stuck.");
+					continue;
+				}
+				int iDistance = Math.abs(num - requestFloor);
+				if(iDistance < distance)
+				{
+					id = i+1;
+					distance = iDistance;
+				}
+				i++;
+				if(i == 4)
+				{
+					break;
+				}
+			}
 		}
+		
 		allElevatorsBusy = 0;
 		
 		System.out.println("The id of the elevator to move is: "+id);
 		elevatorToMove = Integer.toString(id);
-		
 	}
 	
 	/*
