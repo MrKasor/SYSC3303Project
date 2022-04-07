@@ -151,15 +151,17 @@ public class GUI extends JFrame{
 	public void updateEle(int id) throws IOException {
 		Config config = new Config();
 		
-		int eleNumber = id-1;
-		int tempFloor = 4;
+		int eleNumber = id-1; //Floor index
+		int chooseFloor = 4; //Floor to go to
+		int actualFloor = config.getIntProperty("numFloors") - (chooseFloor); //Floor FOR CALCS
 		int eleLocX = 180;
-		int eleLocY = (config.getIntProperty("floorGUI") * (config.getIntProperty("numFloors") - (tempFloor-1))) - 15;
+		int eleLocY = (config.getIntProperty("floorGUI") * (actualFloor+1)) - 15;
 		
-		eleFloor.get(eleNumber).setText("Floor " + tempFloor);
+		floorLamp.get(actualFloor).setBackground(Color.ORANGE);
+		floorDirection.get(actualFloor).setText("UP");
+		eleFloor.get(eleNumber).setText("Floor " + chooseFloor);
 		eleText.get(eleNumber).setText("Elevator is unloading");
 		elePanel.get(eleNumber).setBounds(eleLocX + (config.getIntProperty("eleGUI") * eleNumber ), eleLocY, 25, 25);
 		elePanel.get(eleNumber).setBackground(Color.BLACK);
-		contentPane.add(elePanel.get(eleNumber));
 	}
 }
