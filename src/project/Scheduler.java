@@ -220,33 +220,6 @@ public class Scheduler{
 		System.out.println("The id of the elevator to move is: "+id);
 		elevatorToMove = Integer.toString(id);
 		
-		/** Old code for scheduler
-		System.out.print(elevators[0] + "\n" + elevators[1] + "\n" + elevators[2] + "\n" + elevators[3] + "\n");
-		String[] data1 = elevators[0].split("\\|");
-		String[] data2 = elevators[1].split("\\|");
-		String[] data3 = elevators[2].split("\\|");
-		String[] data4 = elevators[3].split("\\|");
-		
-		
-		int[] elevs = new int[4];
-		elevs[0] = Integer.parseInt(data1[1]);
-		elevs[1] = Integer.parseInt(data2[1]);
-		elevs[2] = Integer.parseInt(data3[1]);
-		elevs[3] = Integer.parseInt(data4[1]);
-		
-		//need to implement a method for finding which floor is closest to the requestFloor
-		int distance = Math.abs(elevs[0] - requestFloor);
-		int id = 1;
-		for(int i = 1; i < 4; i++)
-		{
-			int iDistance = Math.abs(elevs[i] - requestFloor);
-			if(iDistance < distance)
-			{
-				id = i+1;
-				distance = iDistance;
-			}
-		}
-		*/
 	}
 	
 	/*
@@ -285,7 +258,7 @@ public class Scheduler{
 	 */
 	public void sendToFloorSubsystem()
 	{
-		String floorInfo= "Elevator " + elevatorToMove + " is on its way...";
+		String floorInfo= floorDestination+"|"+elevatorToMove+"|1";
 		
 		//Create byte array and assign first byte to 0.
 		 byte[] toSend = new byte[100];

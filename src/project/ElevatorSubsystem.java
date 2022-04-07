@@ -146,8 +146,6 @@ public class ElevatorSubsystem {
 		ElevatorSubsystem eleSystem = new ElevatorSubsystem(config);
 		System.out.println("Elevator System started");
 		
-		System.out.println(eleSystem.getNumEle());
-		
 		int incr = 1;
 		for (int i = 0; i < eleSystem.getNumEle(); i++) {
 			Thread tempThread = new Thread(new Elevator(i+1, incr, eleSystem), "Elevator: "+(i+1));
