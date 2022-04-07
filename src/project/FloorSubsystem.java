@@ -244,6 +244,10 @@ public class FloorSubsystem{
 		Config config = new Config();
 		FloorSubsystem c = new FloorSubsystem(config);
 		
+		long startTime = System.currentTimeMillis();
+		int numRequests = 0;
+		
+		
 		for(String d: data){
 			c.send(d, c.getSchPort(), 1);
 			c.receive();
@@ -253,5 +257,6 @@ public class FloorSubsystem{
 				e.printStackTrace();
 			}
 		}
+		System.out.println("Time elapsed: "+(System.currentTimeMillis() - startTime)+ "ms");
 	}
 }

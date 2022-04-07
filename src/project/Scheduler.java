@@ -23,6 +23,7 @@ public class Scheduler{
 	int requestFloor;
 	String direction;
 	int floorDestination;
+	int currentFloor;
 	int stuckElevator;
 	int stuckDoor;
 	
@@ -41,6 +42,8 @@ public class Scheduler{
 		schPort = config.getIntProperty("schPort");
 		floorPort = config.getIntProperty("floorPort");
 		GUIPort = config.getIntProperty("GUIPort");
+		stuckElevator = config.getIntProperty("eleStuck");
+		stuckDoor = config.getIntProperty("eleDoorStuck");
 		
 		try {
 			
@@ -107,7 +110,6 @@ public class Scheduler{
 		
 		// Form a String from the byte array.
 		String received = new String(data,0,len);   
-		
 		
 		String[] temp = received.split(" ");
 		timestamp = temp[0];
@@ -286,6 +288,30 @@ public class Scheduler{
 		}
 		
 		System.out.println("Scheduler: Packet sent to ElevatorSubsystem.\n");
+		
+		/**
+		//Need to update GUI with this information.
+		format = elevatorToMove+"|"+requestFloor+"|"+floorDestination+"|";
+		System.arraycopy(format.getBytes(), 0, toSend, 0, format.getBytes().length);
+		
+		//prepare the packet to send to server
+		try {
+			sendPacket = new DatagramPacket(toSend, toSend.length, InetAddress.getLocalHost(), GUIPort);
+		} catch (UnknownHostException e) {
+	         e.printStackTrace();
+	         System.exit(1);
+	      }
+		
+		//Send the packet
+		try {
+			sendReceiveSocket.send(sendPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		System.out.println("Scheduler: Packet sent to GUI.\n");
+		*/
 	}
 	
 	/*
