@@ -245,14 +245,12 @@ public class FloorSubsystem{
 		FloorSubsystem c = new FloorSubsystem(config);
 		
 		long startTime = System.currentTimeMillis();
-		int numRequests = 0;
-		
 		
 		for(String d: data){
 			c.send(d, c.getSchPort(), 1);
 			c.receive();
 			try {
-				Thread.sleep(3000);
+				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

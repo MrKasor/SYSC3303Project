@@ -62,18 +62,17 @@ public class Elevator implements Runnable{
 			switch (state) {
 			
 				case Waiting:
-					//System.out.println("Elevator "+id+" is currently waiting for further instruction...");
 					temp = id+"|"+floor+"|0|0|0|"+floor+"|0";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
 					sysRef.updateData(id, temp);
 					nextFloor = sysRef.send(id);
 					destination = sysRef.getDestinationFloor();
 					door.close();
 					if(nextFloor > floor) {//Going up
-						temp = id+"|"+nextFloor+"|0|0|0|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
+						temp = id+"|"+nextFloor+"|1|0|0|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
 						motor.elevatorGoingUp();
 					}
 					else {//Going Down
-						temp = id+"|"+nextFloor+"|0|0|1"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
+						temp = id+"|"+nextFloor+"|1|0|1|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
 						motor.elevatorGoingDown();
 					}
 					System.out.println("Elevator "+id+": moving to floor "+nextFloor);
@@ -97,7 +96,6 @@ public class Elevator implements Runnable{
 						System.out.println("\nElevator "+id+": stopped, people are disembarking.\n");
 						boarding = true;
 					}
-					
 					if(hasPeople) {//Getting on
 						temp = id+"|"+floor+"|1|0|0|"+floor+"|3";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
 						sysRef.updateData(id, temp); //Update that elevator has stopped
@@ -106,7 +104,6 @@ public class Elevator implements Runnable{
 						temp = id+"|"+floor+"|0|0|0|"+floor+"|6";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
 						sysRef.updateData(id, temp); //Update that elevator has stopped
 					}
-					
 					try {
 						Thread.sleep(3000);
 					} catch (InterruptedException e) {
@@ -130,7 +127,7 @@ public class Elevator implements Runnable{
 					{
 						timing = nextFloor - floor;
 						floor++;
-						temp = id+"|"+nextFloor+"|0|0|0|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
+						temp = id+"|"+nextFloor+"|1|0|0|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
 						sysRef.updateData(id, temp);
 						try {
 							Thread.sleep((long)(config.getFloatProperty("distanceBetweenFloors") * 1000));
@@ -142,7 +139,7 @@ public class Elevator implements Runnable{
 					{
 						timing = floor - nextFloor;
 						floor--;
-						temp = id+"|"+nextFloor+"|0|0|0|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
+						temp = id+"|"+nextFloor+"|1|0|0|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
 						sysRef.updateData(id, temp);
 						try {
 							Thread.sleep((long)(config.getFloatProperty("distanceBetweenFloors") * 1000));
@@ -187,7 +184,7 @@ public class Elevator implements Runnable{
 							e.printStackTrace();
 						}
 					}
-					temp = id+"|"+destination+"|"+"0|0|0|"+nextFloor+"|5";
+					temp = id+"|"+destination+"|"+"1|0|0|"+nextFloor+"|5";
 					floor = destination;
 					sysRef.updateData(id, temp);
 					System.out.println("Elevator " +id+": arrived at floor "+destination+".");

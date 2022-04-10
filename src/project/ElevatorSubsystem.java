@@ -105,9 +105,7 @@ public class ElevatorSubsystem {
 	synchronized void updateData(int id, String info) {
         byte[] data = formatDataList();
         sendPacket = helper.sendPacket(socket, data, GUIPort);
-        
         eleList.put(id, info);
-        
         notifyAll();
 	}
 	
@@ -154,10 +152,8 @@ public class ElevatorSubsystem {
         for (int i = 0; i < eleSystem.getNumEle(); i++) {
             Thread tempThread = new Thread(new Elevator(i+1, incr, eleSystem), "Elevator: "+(i+1));
             tempThread.start();
-            eleSystem.updateData(i+1, i+1+"|"+incr+"|0|0|0|0|0");
-            incr += 6;
+            eleSystem.updateData(i+1, i+1+"|"+incr+"|0|0|0|1|0");
         }
-
         while(true) {
             eleSystem.run();
         }
@@ -166,7 +162,6 @@ public class ElevatorSubsystem {
 	public DatagramSocket getSocket() {
 		return socket;
 	}
-
 	public DatagramPacket packetData() {
 		return receivePacket;
 	}

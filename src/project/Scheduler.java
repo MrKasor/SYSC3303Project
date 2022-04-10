@@ -288,30 +288,6 @@ public class Scheduler{
 		}
 		
 		System.out.println("Scheduler: Packet sent to ElevatorSubsystem.\n");
-		
-		/**
-		//Need to update GUI with this information.
-		format = elevatorToMove+"|"+requestFloor+"|"+floorDestination+"|";
-		System.arraycopy(format.getBytes(), 0, toSend, 0, format.getBytes().length);
-		
-		//prepare the packet to send to server
-		try {
-			sendPacket = new DatagramPacket(toSend, toSend.length, InetAddress.getLocalHost(), GUIPort);
-		} catch (UnknownHostException e) {
-	         e.printStackTrace();
-	         System.exit(1);
-	      }
-		
-		//Send the packet
-		try {
-			sendReceiveSocket.send(sendPacket);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		System.out.println("Scheduler: Packet sent to GUI.\n");
-		*/
 	}
 	
 	/*
