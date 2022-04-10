@@ -23,7 +23,6 @@ public class Scheduler{
 	int requestFloor;
 	String direction;
 	int floorDestination;
-	int currentFloor;
 	int stuckElevator;
 	int stuckDoor;
 	
@@ -42,8 +41,6 @@ public class Scheduler{
 		schPort = config.getIntProperty("schPort");
 		floorPort = config.getIntProperty("floorPort");
 		GUIPort = config.getIntProperty("GUIPort");
-		stuckElevator = config.getIntProperty("eleStuck");
-		stuckDoor = config.getIntProperty("eleDoorStuck");
 		
 		try {
 			
@@ -110,6 +107,7 @@ public class Scheduler{
 		
 		// Form a String from the byte array.
 		String received = new String(data,0,len);   
+		
 		
 		String[] temp = received.split(" ");
 		timestamp = temp[0];

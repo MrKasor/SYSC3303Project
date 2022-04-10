@@ -68,7 +68,6 @@ public class FloorSubsystem{
     * @param port
     */
    public void send(String data, int port, int type){
-	   
 	   String temp[] = data.trim().split(" ");
 	   if(temp[2].equalsIgnoreCase("up")) {
 		   isRequesting.put(Integer.parseInt(temp[1]),true);

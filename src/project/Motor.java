@@ -26,7 +26,7 @@ public class Motor {
 	{
 		motorTurnedOn = true;
 		goingUp = true;
-		//System.out.println("Elevator "+elevator+": motor activated. Going up.");
+		System.out.println("Elevator "+elevator+": motor activated. Going up.");
 	}
 	
 	/*
@@ -36,7 +36,7 @@ public class Motor {
 	{
 		motorTurnedOn = true;
 		goingUp = false;
-		//System.out.println("Elevator "+elevator+": motor activated. Going down.");
+		System.out.println("Elevator "+elevator+": motor activated. Going down.");
 	}
 	
 	/*

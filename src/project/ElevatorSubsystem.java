@@ -101,11 +101,23 @@ public class ElevatorSubsystem {
         return data;
 	}
 	
+	public void sendDataListGUI() {
+		byte[] data = formatDataList();
+        sendPacket = helper.sendPacket(socket, data, GUIPort);
+        helper.print(sendPacket, "Elevator Subsystem", "sent to GUI");
+	}
+	
 	//Elevators use this to update the hashmap of elevator locations
 	synchronized void updateData(int id, String info) {
         byte[] data = formatDataList();
         sendPacket = helper.sendPacket(socket, data, GUIPort);
         eleList.put(id, info);
+        eleList.put(id, info);
+        /*
+        System.out.println("Info "+info);
+        System.out.println("ID "+id);
+        */
+        
         notifyAll();
 	}
 	
@@ -136,6 +148,7 @@ public class ElevatorSubsystem {
 		receivePacketOne();
 		sendDataList();
 		receivePacketTwo();
+		sendDataListGUI();
 	}
 
 	/**
