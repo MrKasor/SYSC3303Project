@@ -1,22 +1,25 @@
 package project;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SchedulerTest {
     Scheduler scheduler;
-    Floor floor;
+    FloorSubsystem floor;
     ElevatorSubsystem eleSub;
+    Config config;
 
     @BeforeEach
-    void setUp() {
-        scheduler = new Scheduler();
-        floor = new Floor();
-        eleSub = new ElevatorSubsystem();
+    void setUp() throws IOException {
+        config = new Config();
+        scheduler = new Scheduler(config);
+        floor = new FloorSubsystem(config);
+        eleSub = new ElevatorSubsystem(config);
     }
 
     @AfterEach
@@ -42,15 +45,14 @@ class SchedulerTest {
     void sendToElevatorSubsystem() {
         //The floor sends to the scheduler, the scheduler sends to the elevator subsystem and this method tests if the
         // packet is received by the elevator subsystem.
-        String data = "10000000 1 up 4";
+        String data = "14:05:15.0 1 Up 4";
         floor.send(data, 5000, 1);
         scheduler.receivePacketFloorSubsystem();
+        eleSub.updateData(1, "1\\|0\\|0\\|0\\|0\\|1\\|0");
         scheduler.sendToElevatorSubsystem();
 
         eleSub.receivePacketOne();
-        int len = eleSub.packetData().getLength();
-        String receivedData = new String(eleSub.packetData().getData(), 0, len);
-        assertEquals(data, receivedData);
+        assertTrue(eleSub.packetData() != null);
     }
 
 
@@ -58,10 +60,17 @@ class SchedulerTest {
     void sendToFloorSubsystem() {
         //The floor sends to the scheduler, the scheduler sends back to the floor subsystem and this method tests if the
         // packet is received by the floor subsystem.
-        String data = "10000000 1 up 4";
+        String data = "14:05:15.0 1 Up 4";
         floor.send(data, 5000, 1);
-        scheduler.requestElevatorLocations();
+        scheduler.receivePacketFloorSubsystem();
+
+        eleSub.updateData(1, "1|0|0|0|0|1|0");
+        eleSub.updateData(2, "2|0|0|0|0|1|0");
+        eleSub.updateData(3, "3|0|0|0|0|1|0");
+        eleSub.updateData(4, "4|0|0|0|0|1|0");
+
         eleSub.sendDataList();
+
         scheduler.requestElevatorLocations();
         scheduler.sendToFloorSubsystem();
 
