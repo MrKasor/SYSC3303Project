@@ -239,21 +239,21 @@ public class FloorSubsystem{
 	   return floorPort;
    }
 	
-   public static void main(String args[]) throws IOException{
-       Config config = new Config();
-       FloorSubsystem c = new FloorSubsystem(config);
-
-       long startTime = System.currentTimeMillis();
-
-       for(String d: data){
-           c.send(d, c.getSchPort(), 1);
-           c.receive();
-           try {
-               Thread.sleep(3000);
-           } catch (InterruptedException e) {
-               e.printStackTrace();
-           }
-       }
-       System.out.println("Time elapsed: "+(System.currentTimeMillis() - startTime)+ "ms");
-   }
+	public static void main(String args[]) throws IOException{
+		Config config = new Config();
+		FloorSubsystem c = new FloorSubsystem(config);
+		
+		long startTime = System.currentTimeMillis();
+		
+		for(String d: data){
+			c.send(d, c.getSchPort(), 1);
+			c.receive();
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Time elapsed: "+(System.currentTimeMillis() - startTime)+ "ms");
+	}
 }
