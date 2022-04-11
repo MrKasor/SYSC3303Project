@@ -165,11 +165,6 @@ public class GUI extends JFrame{
 			}
 		}
 		
-		for(int n : floorInts) {
-			System.out.print(n+":");
-		}
-		System.out.println("");
-		
 		
 		for(String elevator : elevatorsStatus){
 			String temp[] = elevator.trim().split("\\|");
@@ -259,7 +254,7 @@ public class GUI extends JFrame{
 		
 		int state = Integer.parseInt(temp[0]);
 		String message = temp[1];
-		System.out.println("ID: "+temp[1]);
+		//System.out.println("ID: "+temp[1]);
 		scheduler.setText(message);
 	}
 	
@@ -269,7 +264,7 @@ public class GUI extends JFrame{
         if(receivePacket.getPort() == 5002) {
         	eleSim(new String(receivePacket.getData()));
         }
-        System.out.println(receivePacket.getPort());
+        //System.out.println(receivePacket.getPort());
         if(receivePacket.getPort() == 5000) {
         	schSim(new String(receivePacket.getData()));
         }
