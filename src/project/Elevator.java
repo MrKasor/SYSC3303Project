@@ -13,12 +13,13 @@ import java.io.IOException;
 public class Elevator implements Runnable{
 	private int id;
 	private ElevatorSubsystem sysRef;
-	private int nextFloor = 0;
-	private int destination = 0;
-	private int currentFloor = 0;
-	private int floor;
+	private int pickupFloor = 0;
+	private int destFloor = 0;
+	private int curFloor = 0;
 	private boolean hasPeople = false;
 	private boolean boarding = true;
+	private boolean errorDoor = false;
+	private boolean errorFull = false;
 	private Door door;
 	private Motor motor;
 	private ElevatorLamp lamp;
@@ -34,7 +35,7 @@ public class Elevator implements Runnable{
 	 */
 	public Elevator(int id, int floor, ElevatorSubsystem sysRef) throws IOException {
 		this.id=id;
-		this.floor=floor;
+		this.curFloor=floor;
 		this.sysRef=sysRef;
 		door = new Door(id, false, false);
 		motor = new Motor(id, false, false);
@@ -62,138 +63,178 @@ public class Elevator implements Runnable{
 			switch (state) {
 			
 				case Waiting:
-					temp = id+"|"+floor+"|0|0|0|"+floor+"|0";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
+					
+					//Set ele as idle
+					System.out.println("Elevator " +id+": is Idle");
+					//System.out.println("Elevator "+id+" is currently waiting for further instruction...");
+					temp = id+"|"+0+"|0|0|0|"+curFloor+"|0";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
 					sysRef.updateData(id, temp);
-					nextFloor = sysRef.send(id);
-					destination = sysRef.getDestinationFloor();
-					door.close();
-					if(nextFloor > floor) {//Going up
-						temp = id+"|"+nextFloor+"|1|0|0|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
-						motor.elevatorGoingUp();
+					
+					//Find next destination
+					pickupFloor = sysRef.send(id);
+					destFloor = sysRef.getDestinationFloor();
+					
+					//Set ele to moving
+					if(pickupFloor > curFloor) {//Going up
+						temp = id+"|"+pickupFloor+"|0|0|0|"+curFloor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
 					}
 					else {//Going Down
-						temp = id+"|"+nextFloor+"|1|0|1|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
-						motor.elevatorGoingDown();
+						temp = id+"|"+pickupFloor+"|0|0|1|"+curFloor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
 					}
-					System.out.println("Elevator "+id+": moving to floor "+nextFloor);
 					sysRef.updateData(id, temp); //update that elevator is moving
+					
+					System.out.println("Elevator "+id+": moving to floor "+pickupFloor);
 					state = ElevatorState.MovingToPassengers;
+					
+					break;
+				
+				case MovingToPassengers:
+					
+					//Move elevator floor by floor up or down
+					System.out.println("Please wait until elevator "+id+" has arrived...");
+					//int timing = 0;
+					
+					//going up
+					while(pickupFloor > curFloor){ 
+						
+						motor.elevatorGoingUp();
+						try {
+							Thread.sleep((long) config.getFloatProperty("timePerFloor"));
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						//timing = destFloor - curFloor;
+						curFloor++;
+						temp = id+"|"+pickupFloor+"|0|0|0|"+curFloor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
+						sysRef.updateData(id, temp);
+					}
+					
+					//going down
+					while(pickupFloor < curFloor) {
+						
+						motor.elevatorGoingDown();
+						try {
+							Thread.sleep((long) config.getFloatProperty("timePerFloor"));
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						//timing = floor - destFloor;
+						curFloor--;
+						temp = id+"|"+pickupFloor+"|0|0|0|"+curFloor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
+						sysRef.updateData(id, temp);
+					}
+					
+					System.out.println("Elevator " +id+": has arrived at floor "+pickupFloor+".");
+					motor.elevatorArrived();
+					state = ElevatorState.Stopped;
+					
 					break;
 					
 				case Stopped:
+					
+					int people = 0;
+					
+					//Opening Doors
+					temp = id+"|"+curFloor+"|"+people+"|0|0|"+curFloor+"|2";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
+					sysRef.updateData(id, temp); //Update that elevator has stopped
+					try {
+						Thread.sleep((long) config.getFloatProperty("timeDoor"));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					door.open();
+					
 					//Sleep while customers are getting on/off, then switch to waiting.
-					if(boarding)
-					{
+					if(boarding){
 						hasPeople = true;
+						people = 1;
 						System.out.println("\nElevator "+id+": stopped, people are boarding.\n");
 						boarding = false;
 						button.elevatorButtonPressed();
 						lamp.turnElevatorLampOn();
 					}
-					else
-					{
+					else {
+						people = 0;
 						hasPeople = false;
 						System.out.println("\nElevator "+id+": stopped, people are disembarking.\n");
 						boarding = true;
 					}
+					
+					// set ele as people getting on or off then sleep
 					if(hasPeople) {//Getting on
-						temp = id+"|"+floor+"|1|0|0|"+floor+"|3";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
+						temp = id+"|"+curFloor+"|"+people+"|0|0|"+curFloor+"|3";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|STATE
 						sysRef.updateData(id, temp); //Update that elevator has stopped
 					}
 					else {//Getting off
-						temp = id+"|"+floor+"|0|0|0|"+floor+"|6";//ID|FLOOR|PEOPLE|MOVING|DIRECTION
+						temp = id+"|"+curFloor+"|"+people+"|0|0|"+curFloor+"|6";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|STATE
 						sysRef.updateData(id, temp); //Update that elevator has stopped
 					}
 					try {
-						Thread.sleep(3000);
+						Thread.sleep((long) config.getFloatProperty("timeBoard"));
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 					
-					if(!boarding) 
-					{
+					//Closing Doors
+					temp = id+"|"+curFloor+"|"+people+"|0|0|"+curFloor+"|4";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|STATE
+					sysRef.updateData(id, temp); //Update that elevator has stopped
+					try {
+						Thread.sleep((long) config.getFloatProperty("timeDoor"));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					door.close();
+					
+					if(!boarding) {
 						state = ElevatorState.MovingToDestination;
 					}
-					else 
-					{
+					else {
 						state = ElevatorState.Waiting;
 					}
-					break;
-				
-				case MovingToPassengers:
-					System.out.println("Please wait until elevator "+id+" has arrived...");
-					int timing = 0;
-					while(nextFloor > floor)
-					{
-						timing = nextFloor - floor;
-						floor++;
-						temp = id+"|"+nextFloor+"|1|0|0|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
-						sysRef.updateData(id, temp);
-						try {
-							Thread.sleep((long)(config.getFloatProperty("distanceBetweenFloors") * 1000));
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-					while(nextFloor < floor)
-					{
-						timing = floor - nextFloor;
-						floor--;
-						temp = id+"|"+nextFloor+"|1|0|0|"+floor+"|1";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
-						sysRef.updateData(id, temp);
-						try {
-							Thread.sleep((long)(config.getFloatProperty("distanceBetweenFloors") * 1000));
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-					System.out.println("Elevator " +id+": has arrived at floor "+nextFloor+".");
-					motor.elevatorArrived();
-					door.open();
-					state = ElevatorState.Stopped;
+					
 					break;
 					
 				case MovingToDestination:
-					System.out.println("Elevator "+id+": Bringing passengers to floor "+destination+".");
+					
+					//move ele to destination one floor at a time up or down
+					System.out.println("Elevator "+id+": Bringing passengers to floor "+destFloor+".");
 					door.close();
-					timing = 0;
-					while(destination > nextFloor)
-					{
-						timing = destination - nextFloor;
+					//timing = 0;
+					while(destFloor > curFloor){//going up
+						//timing = destination - destFloor;
 						motor.elevatorGoingUp();
-						nextFloor++;
-						temp = id+"|"+nextFloor+"|1|0|0|"+nextFloor+"|5";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
-						sysRef.updateData(id, temp);
 						try {
-							Thread.sleep((long)(config.getFloatProperty("distanceBetweenFloors") * 1000));
+							Thread.sleep((long) config.getFloatProperty("timePerFloor"));
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
+						curFloor++;
+						temp = id+"|"+destFloor+"|1|0|0|"+curFloor+"|5";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
+						sysRef.updateData(id, temp);
 						
 					}
-					while(destination < nextFloor)
-					{
-						timing = nextFloor - destination;
+					while(destFloor < curFloor){//going down
+						//timing = destFloor - curFloor;
 						motor.elevatorGoingDown();
-						nextFloor--;
-						temp = id+"|"+nextFloor+"|1|0|0|"+nextFloor+"|5";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
-						sysRef.updateData(id, temp);
 						try {
-							Thread.sleep((long)(config.getFloatProperty("distanceBetweenFloors") * 1000));
+							Thread.sleep((long) config.getFloatProperty("timePerFloor"));
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
+						curFloor--;
+						temp = id+"|"+destFloor+"|1|0|0|"+curFloor+"|5";//ID|FLOOR|PEOPLE|MOVING|DIRECTION|CURFLOOR|STATE
+						sysRef.updateData(id, temp);
 					}
-					temp = id+"|"+destination+"|"+"1|0|0|"+nextFloor+"|5";
-					floor = destination;
+					
+					//Arrived so update ele
+					System.out.println("Elevator " +id+": arrived at floor "+destFloor+".");
+					curFloor = destFloor;
+					temp = id+"|"+destFloor+"|"+"0|0|0|"+curFloor+"|5";
 					sysRef.updateData(id, temp);
-					System.out.println("Elevator " +id+": arrived at floor "+destination+".");
 					motor.elevatorArrived();
-					door.open();
 					state = ElevatorState.Stopped;
 					break;
 			}
 		}
 	}
-	
 }
