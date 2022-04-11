@@ -40,7 +40,7 @@ class ElevatorTest {
 
     @AfterEach
     void tearDown() {
-        scheduler.receiveSocket.close();
+        scheduler.sendReceiveSocket.close();
         floorSubsystem.sendReceiveSocket.close();
         elevatorSubsystem.getSocket().close();
     }

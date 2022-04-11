@@ -25,7 +25,7 @@ class FloorTest {
 
     @AfterEach
     void tearDown() {
-        floor.sendReceiveSocket.close();
+        floor.testSocket.close();
         testSocket.close();
     }
 

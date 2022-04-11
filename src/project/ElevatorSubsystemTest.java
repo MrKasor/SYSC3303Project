@@ -26,7 +26,7 @@ class ElevatorSubsystemTest {
     @AfterEach
     void tearDown() {
         //Close all sockets after each call
-        scheduler.receiveSocket.close();
+        scheduler.sendReceiveSocket.close();
         floor.sendReceiveSocket.close();
         elevSub.getSocket().close();
     }

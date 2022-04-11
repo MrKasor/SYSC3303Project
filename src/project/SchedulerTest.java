@@ -24,7 +24,7 @@ class SchedulerTest {
 
     @AfterEach
     void tearDown() {
-        scheduler.receiveSocket.close();
+        scheduler.sendReceiveSocket.close();
         floor.sendReceiveSocket.close();
         eleSub.getSocket().close();
     }

@@ -176,4 +176,9 @@ public class ElevatorSubsystem {
 	public DatagramPacket packetData() {
 		return receivePacket;
 	}
+
+	public Map<Integer, String> getEleList() {
+		// TODO Auto-generated method stub
+		return eleList;
+	}
 }
