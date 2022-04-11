@@ -30,7 +30,7 @@ public class Scheduler{
 	String elevatorToMove;
 
 	DatagramPacket sendPacket, receivePacket, serverPacket;
-	DatagramSocket sendReceiveSocket, receiveSocket;
+	DatagramSocket sendReceiveSocket;
 	private int elePort;
 	private int schPort;
 	private int floorPort;
@@ -44,15 +44,10 @@ public class Scheduler{
 		
 		try {
 			
-			// Construct a datagram socket and bind it to port 5000 
-			// on the local host machine. This socket will be used to
-			// receive UDP Datagram packets.
-			receiveSocket = new DatagramSocket(schPort);
-			
 			// Construct a datagram socket and bind it to any available 
 			// port on the local host machine. This socket will be used to
 			// send and receive UDP Datagram packets.
-			sendReceiveSocket = new DatagramSocket();
+			sendReceiveSocket = new DatagramSocket(schPort);
 		} catch (SocketException se) {   // Can't create the socket.
 			se.printStackTrace();
 			System.exit(1);
@@ -87,9 +82,10 @@ public class Scheduler{
 		receivePacket = new DatagramPacket(data, data.length);
 		
 		// Block until a datagram packet is received from receiveSocket.
-		try {        
+		try {    
+			sendToGUI("Waiting for response from FloorSubsystem.");
 			System.out.println("Waiting for response from FloorSubsystem..."); // so we know we're waiting
-			receiveSocket.receive(receivePacket);
+			sendReceiveSocket.receive(receivePacket);
 		} catch (IOException e) {
 			System.out.print("IO Exception: likely:");
 			System.out.println("Receive Socket Timed Out.\n" + e);
@@ -142,6 +138,7 @@ public class Scheduler{
 			System.exit(1);
 		}
 		
+		sendToGUI("Packet sent to ElevatorSubsystem to get elevator locations.");
 		System.out.println("Scheduler: Packet sent to ElevatorSubsystem to get elevator locations.\n");
 		
 		//Now we need to store the locations we get from the response
@@ -153,7 +150,7 @@ public class Scheduler{
 		// Block until a datagram packet is received from receiveSocket.
 		try {        
 			System.out.println("Waiting for response from ElevatorSubsystem..."); // so we know we're waiting
-			receiveSocket.receive(serverPacket);
+			sendReceiveSocket.receive(serverPacket);
 		} catch (IOException e) {
 			System.out.print("IO Exception: likely:");
 			System.out.println("Receive Socket Timed Out.\n" + e);
@@ -252,7 +249,7 @@ public class Scheduler{
 		}
 		
 		allElevatorsBusy = 0;
-		
+		sendToGUI("The id of the elevator to move is: "+id);
 		System.out.println("The id of the elevator to move is: "+id);
 		elevatorToMove = Integer.toString(id);
 	}
@@ -284,7 +281,7 @@ public class Scheduler{
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
+		sendToGUI("Packet sent to ElevatorSubsystem.");
 		System.out.println("Scheduler: Packet sent to ElevatorSubsystem.\n");
 	}
 	
@@ -315,8 +312,34 @@ public class Scheduler{
 			e.printStackTrace();
 			System.exit(1);
 		}
+		sendToGUI("Packet sent to FloorSubsystem.");
 		
 		System.out.println("Scheduler: Packet sent to FloorSubsystem.\n");
+	}
+	
+	public void sendToGUI(String message){
+		String GUIInfo= 0+"|"+message;
+		
+		//Create byte array and assign first byte to 0.
+		 byte[] toSend = new byte[100];
+		   
+		 //now we need to insert the message from data into our byte array.
+		 System.arraycopy(GUIInfo.getBytes(), 0, toSend, 0, GUIInfo.getBytes().length);
+		
+		//prepare the packet to send to client
+		try {
+			sendPacket = new DatagramPacket(toSend, toSend.length, InetAddress.getLocalHost(), GUIPort);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		//Send to client
+		try {
+			sendReceiveSocket.send(sendPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 	
     public static void main(String[] args) throws IOException{

@@ -104,7 +104,7 @@ public class ElevatorSubsystem {
 	public void sendDataListGUI() {
 		byte[] data = formatDataList();
         sendPacket = helper.sendPacket(socket, data, GUIPort);
-        helper.print(sendPacket, "Elevator Subsystem", "sent to GUI");
+        //helper.print(sendPacket, "Elevator Subsystem", "sent to GUI");
 	}
 	
 	//Elevators use this to update the hashmap of elevator locations
@@ -114,6 +114,7 @@ public class ElevatorSubsystem {
         System.out.println("Info "+info);
         System.out.println("ID "+id);
         */
+        sendDataListGUI();
         
         notifyAll();
 	}
@@ -145,7 +146,6 @@ public class ElevatorSubsystem {
 		receivePacketOne();
 		sendDataList();
 		receivePacketTwo();
-		sendDataListGUI();
 	}
 
 	/**
@@ -158,12 +158,10 @@ public class ElevatorSubsystem {
         System.out.println("Elevator System started");
         System.out.println("Number of Elevators: "+eleSystem.getNumEle());
 
-        int incr = 1;
         for (int i = 0; i < eleSystem.getNumEle(); i++) {
-            Thread tempThread = new Thread(new Elevator(i+1, incr, eleSystem), "Elevator: "+(i+1));
+            Thread tempThread = new Thread(new Elevator(i+1, 1, eleSystem), "Elevator: "+(i+1));
             tempThread.start();
-            eleSystem.updateData(i+1, i+1+"|"+incr+"|0|0|0|0|0");
-            incr += 6;
+            eleSystem.updateData(i+1, i+1+"|"+0+"|0|0|0|1|0");
         }
 
         while(true) {

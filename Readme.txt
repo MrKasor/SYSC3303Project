@@ -1,4 +1,7 @@
-Iteration 4:
+Iteration 5:
+
+Intstructions
+Run ElevatorSubsystem, GUI, Scheduler, then FloorSubsystem in that order.
 
 TEAM MEMBERS:
 - Colton North
@@ -21,9 +24,12 @@ Colton North
 Ryan Kasor
 - Created basis for the Elevator Class.
 - Reworked the ElevatorSubsystem Class to use Sockets.
+- Created the GUI, reworked the Elevator/Scheduler Classes to work with the GUI.
+- Reworked the Elevator class to work with GUI timings
 - Created helper class for Socket use called PacketHelper.
-- Created helper class for Config Files called Config to allow config file use.
+- Created helper class for Config Files called Config to allow config file use and created the config file.
 - Split the FloorSubsystem from the Basic Floor Class.
+- Many Bugfixes in the Elevator/ElevatorSubSystem/FloorSubsystem/Floor/Scheduler/GUI classes.
 - Created the FloorLamp/FloorButton.
 - Setup the reading of input.txt in Floor Class.
 - Setup state machine in Elevator Class.

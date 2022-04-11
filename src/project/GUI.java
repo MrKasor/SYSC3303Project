@@ -22,6 +22,7 @@ public class GUI extends JFrame{
 	private List<JTextPane> floorDirection = new ArrayList<JTextPane>();
 	private List<JPanel> elePanel = new ArrayList<JPanel>();
 	private List<JPanel> floorLamp = new ArrayList<JPanel>();
+	//private List<Integer> floorInts = new ArrayList<Integer>();
 	private int GUIPort;
 	private JTextPane scheduler;
 	private Config config;
@@ -135,7 +136,7 @@ public class GUI extends JFrame{
 	}
 	
 	public void eleSim(String data){
-		System.out.println(data);
+		//System.out.println(data);
 		String elevatorsStatus[] = data.trim().split(";");
 		
 		//Data
@@ -144,25 +145,43 @@ public class GUI extends JFrame{
 		int direction;
 		int curFloor;
 		int state;
+		int numFloors = config.getIntProperty("numFloors");
+		
+		int[] floorInts = new int[numFloors];
+		for(int n: floorInts) {
+			n = 0;
+		}
 		
 		int eleLocX;
 		int eleLocY;
 		
+		
 		for(String elevator : elevatorsStatus){
-			System.out.println(elevator);
-			elevator = elevator.replace(";", "");
+			String temp[] = elevator.trim().split("\\|");
+			//System.out.println(elevator);
+			//elevator = elevator.replace(";", "");
+			if(Integer.parseInt(temp[1]) != 0) {
+				floorInts[Integer.parseInt(temp[1])-1]=1;
+			}
 		}
+		
+		for(int n : floorInts) {
+			System.out.print(n+":");
+		}
+		System.out.println("");
+		
 		
 		for(String elevator : elevatorsStatus){
 			String temp[] = elevator.trim().split("\\|");
 			
-			
+			/*
 			System.out.println("ID: "+temp[0]);
 			System.out.println("DesFloor: "+temp[1]);
 			System.out.println("Direction: "+temp[4]);
 			System.out.println("CurFloor: "+temp[5]);
 			System.out.println("State: "+temp[6]);
-			
+			System.out.println("Here~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			*/			
 			
 			id = Integer.parseInt(temp[0]);
 			destFloor = Integer.parseInt(temp[1]);
@@ -172,20 +191,34 @@ public class GUI extends JFrame{
 			state = Integer.parseInt(temp[6]);
 			
 			eleLocX = 180;
-			eleLocY = (config.getIntProperty("floorGUI") * (config.getIntProperty("numFloors") - (curFloor) + 1)) - 15;
+			eleLocY = (config.getIntProperty("floorGUI") * (numFloors - (curFloor) + 1)) - 15;
 			
-			//Floors
-			if(state != 0) { //Turn ON Floors DOESNT WORK
-				floorLamp.get(config.getIntProperty("numFloors") - (destFloor + 3)).setBackground(Color.ORANGE);;
-				if(direction==0) {
-					floorDirection.get(config.getIntProperty("numFloors") - (destFloor)).setText("UP");
-				}else if(direction==1){
-					floorDirection.get(config.getIntProperty("numFloors") - (destFloor)).setText("DOWN");
+			//Floor Lamp
+			for(int i = 0 ; i < floorLamp.size() ; i++) {
+				if(floorInts[i]==1) {
+					floorLamp.get(numFloors - i-1).setBackground(Color.ORANGE);
 				}
-			}else { //Turn OFF Floors
-				floorLamp.get(config.getIntProperty("numFloors") - (destFloor)).setBackground(Color.WHITE);;
-				floorDirection.get(config.getIntProperty("numFloors") - (destFloor)).setText("");
+				else{
+					floorLamp.get(numFloors - i-1).setBackground(Color.WHITE);
+				}
 			}
+			
+			
+			//Floor Direction
+			for(int i = 0 ; i < floorLamp.size() ; i++) {
+				if(floorInts[i]==1) {
+					if(direction==0) {
+						floorDirection.get(numFloors - i-1).setText("UP");
+					}else if(direction==1){
+						floorDirection.get(numFloors - i-1).setText("DOWN");
+					}
+				}
+				else {
+					floorDirection.get(numFloors - i-1).setText("");
+				}
+			}
+			
+			
 			
 			//Elevator Current Floor
 			eleFloor.get(id-1).setText("Floor " + curFloor);
@@ -212,20 +245,34 @@ public class GUI extends JFrame{
 			else if(state == 7) {
 				eleText.get(id-1).setText("Elevator Error");
 			}
-		}	
+			else if(state == 8) {
+				eleText.get(id-1).setText("Elevator Door Error");
+			}
+			else if(state == 0) {
+				eleText.get(id-1).setText("Elevator is Idle");
+			}
+		}
 	}
 	
 	public void schSim(String data) {
 		String temp[] = data.trim().split("\\|");
 		
 		int state = Integer.parseInt(temp[0]);
-		String Message = temp[1];
+		String message = temp[1];
+		System.out.println("ID: "+temp[1]);
+		scheduler.setText(message);
 	}
 	
 	//Recieve packet
 	public void receive() {
         receivePacket = helper.receivePacket(socket);
-        eleSim(new String(receivePacket.getData()));
+        if(receivePacket.getPort() == 5002) {
+        	eleSim(new String(receivePacket.getData()));
+        }
+        System.out.println(receivePacket.getPort());
+        if(receivePacket.getPort() == 5000) {
+        	schSim(new String(receivePacket.getData()));
+        }
     }
 	
 	/*
