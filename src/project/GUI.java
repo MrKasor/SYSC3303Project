@@ -11,6 +11,11 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+/**
+ * 
+ * @author Ryan
+ *
+ */
 
 public class GUI extends JFrame{
 	private DatagramSocket socket;
@@ -22,7 +27,6 @@ public class GUI extends JFrame{
 	private List<JTextPane> floorDirection = new ArrayList<JTextPane>();
 	private List<JPanel> elePanel = new ArrayList<JPanel>();
 	private List<JPanel> floorLamp = new ArrayList<JPanel>();
-	//private List<Integer> floorInts = new ArrayList<Integer>();
 	private int GUIPort;
 	private JTextPane scheduler;
 	private Config config;
@@ -43,7 +47,7 @@ public class GUI extends JFrame{
 	}
 
 	/**
-	 * Create the frame.
+	 * Create the frame and set starting defaults
 	 * @throws IOException 
 	 */
 	public GUI() throws IOException {
@@ -135,8 +139,12 @@ public class GUI extends JFrame{
 		contentPane.add(scheduler);
 	}
 	
+	/**
+	 * Simulates elevator movement on the frame
+	 * 
+	 * @param data	list of elevators to simulate
+	 */
 	public void eleSim(String data){
-		//System.out.println(data);
 		String elevatorsStatus[] = data.trim().split(";");
 		
 		//Data
@@ -147,44 +155,37 @@ public class GUI extends JFrame{
 		int state;
 		int numFloors = config.getIntProperty("numFloors");
 		
+		//Create the array of floors to know which to light up 
+		//set them all to not light up by default
 		int[] floorInts = new int[numFloors];
 		for(int n: floorInts) {
 			n = 0;
 		}
 		
+		//Elevator X & Y Locations
 		int eleLocX;
 		int eleLocY;
 		
-		
+		//Set the correct floors to light up in the array floorInts
 		for(String elevator : elevatorsStatus){
 			String temp[] = elevator.trim().split("\\|");
-			//System.out.println(elevator);
-			//elevator = elevator.replace(";", "");
+			
 			if(Integer.parseInt(temp[1]) != 0) {
 				floorInts[Integer.parseInt(temp[1])-1]=1;
 			}
 		}
 		
-		
+		//Main loop for elevators
 		for(String elevator : elevatorsStatus){
-			String temp[] = elevator.trim().split("\\|");
+			String temp[] = elevator.trim().split("\\|");		
 			
-			/*
-			System.out.println("ID: "+temp[0]);
-			System.out.println("DesFloor: "+temp[1]);
-			System.out.println("Direction: "+temp[4]);
-			System.out.println("CurFloor: "+temp[5]);
-			System.out.println("State: "+temp[6]);
-			System.out.println("Here~~~~~~~~~~~~~~~~~~~~~~~~~~");
-			*/			
-			
+			//INIT the data
 			id = Integer.parseInt(temp[0]);
 			destFloor = Integer.parseInt(temp[1]);
 			direction = Integer.parseInt(temp[4]);
 			curFloor = Integer.parseInt(temp[5]);
 			temp[6] = temp[6].replace(";", "");
 			state = Integer.parseInt(temp[6]);
-			
 			eleLocX = 180;
 			eleLocY = (config.getIntProperty("floorGUI") * (numFloors - (curFloor) + 1)) - 15;
 			
@@ -249,6 +250,11 @@ public class GUI extends JFrame{
 		}
 	}
 	
+	/**
+	 * Simulates what the scheduler is doing
+	 * 
+	 * @param data	what the scheduler should say
+	 */
 	public void schSim(String data) {
 		String temp[] = data.trim().split("\\|");
 		
@@ -258,7 +264,11 @@ public class GUI extends JFrame{
 		scheduler.setText(message);
 	}
 	
-	//Recieve packet
+
+	/**
+	 * Receives packets and sends them to their correct methods for processing
+	 * 
+	 */
 	public void receive() {
         receivePacket = helper.receivePacket(socket);
         if(receivePacket.getPort() == 5002) {
@@ -269,20 +279,4 @@ public class GUI extends JFrame{
         	schSim(new String(receivePacket.getData()));
         }
     }
-	
-	/*
-	public void updateEle(int id) {
-		int eleNumber = id-1; //Floor index
-		int chooseFloor = 4; //Floor to go to
-		int actualFloor = config.getIntProperty("numFloors") - (chooseFloor); //Floor FOR CALCS
-		int eleLocX = 180;
-		int eleLocY = (config.getIntProperty("floorGUI") * (actualFloor+1)) - 15;
-		
-		floorLamp.get(actualFloor).setBackground(Color.ORANGE);
-		floorDirection.get(actualFloor).setText("UP");
-		eleFloor.get(eleNumber).setText("Floor " + chooseFloor);
-		eleText.get(eleNumber).setText("Elevator is unloading");
-		elePanel.get(eleNumber).setBounds(eleLocX + (config.getIntProperty("eleGUI") * eleNumber ), eleLocY, 25, 25);
-	}
-	*/
 }

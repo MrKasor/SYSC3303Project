@@ -61,11 +61,12 @@ public class FloorSubsystem{
     }
 	
 	/**
-    * Sends a message to the Scheduler with port number 5000.
+    * Sends a message to the Scheduler.
     * 
     * 
     * @param data
     * @param port
+    * @param type
     */
    public void send(String data, int port, int type){
 	   String temp[] = data.trim().split(" ");
@@ -111,6 +112,12 @@ public class FloorSubsystem{
        System.out.println("FloorSubsystem: Packet sent.\n");
    }
    
+   /**
+    * Receives packets from the Scheduler.
+    * 
+    * @param data
+    * @param port
+    */
    public void receive()
    {
 	   // Construct a DatagramPacket for receiving packets up 
@@ -165,6 +172,11 @@ public class FloorSubsystem{
        
    }
    
+   /**
+    * Floors use this to see if they are requesting an elevator
+    * 
+    * @return true/false
+    */
    synchronized boolean isRequesting(int id) {
 	   if(isRequesting.containsKey(id)) {
 		   return true;
@@ -172,6 +184,11 @@ public class FloorSubsystem{
 	   return false;
    }
    
+   /**
+    * Floors use this to see if they are going up or down when requesting
+    * 
+    * @return isRequesting.get(id)
+    */
    synchronized boolean isRequestingUp(int id) {
 	   while(!isRequesting.containsKey(id)) {
 			try{
@@ -183,7 +200,11 @@ public class FloorSubsystem{
 	   return isRequesting.get(id);
    }
    
-   //Floors use this to see if an elevator is coming
+   /**
+    * Floors use this to see if they are requesting an elevator and receive a list back
+    * 
+    * @return activeList.get(id)
+    */
    synchronized List<Integer> eleComing(int id) {
 		while(!activeList.containsKey(id)) {
 			try{
@@ -222,24 +243,25 @@ public class FloorSubsystem{
 		return data;
 	}
 	
-	public DatagramPacket packetData() {
-		return receivePacket;
-	}
-
-	public int getSchPort() {
-	   return schPort;
-   }
-   public int getElePort() {
-	   return elePort;
-   }
-   public int getGUIPort() {
-	   return GUIPort;
-   }
-   public int getFloorPort() {
-	   return floorPort;
-   }
+	/**
+	 * Simple Getters
+	 * 
+	 */
+	public DatagramPacket packetData() {return receivePacket;}
 	
-   public static void main(String args[]) throws IOException{
+	public int getSchPort() {return schPort;}
+	
+	public int getElePort() {return elePort;}
+	
+	public int getGUIPort() {return GUIPort;}
+	
+	public int getFloorPort() {return floorPort;}
+	
+	/**
+	 * Main the starts everything
+	 * 
+	 */
+	public static void main(String args[]) throws IOException{
        Config config = new Config();
        FloorSubsystem c = new FloorSubsystem(config);
 
@@ -255,5 +277,5 @@ public class FloorSubsystem{
            }
        }
        System.out.println("Time elapsed: "+(System.currentTimeMillis() - startTime)+ "ms");
-   }
+	}
 }

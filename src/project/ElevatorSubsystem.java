@@ -27,7 +27,11 @@ public class ElevatorSubsystem {
 	private int arrivedFloor;
 	private Map<Integer, String> eleList = new HashMap<>();
 	
-	//Server Socket on port 5000
+	/**
+	 * Constructor for ElevatorSubsystem. Sets the socket on port 5000 and defaults
+	 * 
+	 * @param config	which is a reference to the Config class
+	 */
 	public ElevatorSubsystem(Config config) {
 		//Import config File Properties
 		numEle = config.getIntProperty("numEle");
@@ -51,7 +55,10 @@ public class ElevatorSubsystem {
 		}
 	}
 	
-	//When a floor needs a elevator
+	/**
+	 * Waits for a request for the list of elevators from the scheduler
+	 * 
+	 */
 	public void receivePacketOne() {
 		System.out.println("Waiting for packet from Scheduler...");
         receivePacket = helper.receivePacket(socket);
@@ -60,7 +67,10 @@ public class ElevatorSubsystem {
         System.out.println("\nContaining: " + new String(receivePacket.getData()) +"\n");
     }
 	
-	//Scheduler returning which elevator to send and to where
+	/**
+	 * Waits for the scheduler to tell it which elevator to send to which floor
+	 * 
+	 */
 	synchronized void receivePacketTwo() {
         receivePacket = helper.receivePacket(socket);
         helper.print(receivePacket, "Elevator Subsystem", "received from Scheduler");
@@ -75,7 +85,10 @@ public class ElevatorSubsystem {
         notifyAll();
     }
 	
-	//Convert the message into a byte array then send it
+	/**
+	 * Sends the list of elevators to the scheduler using a packet and formatDataList() 
+	 * 
+	 */
 	public void sendDataList() {
 		byte[] data = formatDataList();
 		sendPacket = helper.sendPacket(socket, data, schPort);
@@ -83,6 +96,11 @@ public class ElevatorSubsystem {
 	}
 	
 	//Format a list to send to the scheduler
+	/**
+	 * Converts the list of elevators into a byte array format to use in a packet
+	 * 
+	 * @return data		byte[] made from eleList
+	 */
 	private byte[] formatDataList() {
 		String temp = "";
 			
@@ -101,25 +119,32 @@ public class ElevatorSubsystem {
         return data;
 	}
 	
+	/**
+	 * Sends the list of elevators to the GUI using a packet and formatDataList()
+	 * 
+	 */
 	public void sendDataListGUI() {
 		byte[] data = formatDataList();
         sendPacket = helper.sendPacket(socket, data, GUIPort);
         //helper.print(sendPacket, "Elevator Subsystem", "sent to GUI");
 	}
 	
-	//Elevators use this to update the hashmap of elevator locations
+	/**
+	 * Elevators use this to update the hashmap eleList that is full of elevator locations
+	 * 
+	 */
 	synchronized void updateData(int id, String info) {
         eleList.put(id, info);
-        /*
-        System.out.println("Info "+info);
-        System.out.println("ID "+id);
-        */
         sendDataListGUI();
         
         notifyAll();
 	}
 	
-	//Elevators use this to see if they have been sent to a floor
+	/**
+	 * Elevators use this to check if they have been sent to a floor
+	 * 
+	 * @return nextFloor	represents the floor they are sent to
+	 */
 	synchronized int send(int id) {
 		while(nextEle != id) {
 			try{
@@ -131,17 +156,25 @@ public class ElevatorSubsystem {
         return nextFloor;
 	}
 	
-	public int getDestinationFloor()
-	{
-		return destinationFloor;
-	}
+	/**
+	 * Simple getters
+	 * 
+	 */
+	public int getDestinationFloor(){return destinationFloor;}
 	
-	public int getNumEle() {
-		return numEle;
-	}
+	public int getNumEle() {return numEle;}
+	
+	public DatagramSocket getSocket() {return socket;}
+
+	public DatagramPacket packetData() {return receivePacket;}
+
+	public Map<Integer, String> getEleList() {return eleList;}
 	
 	
-	//Order that the methods run in
+	/**
+	 * Order that the methods run in
+	 * 
+	 */
 	public void run() {
 		receivePacketOne();
 		sendDataList();
@@ -168,17 +201,4 @@ public class ElevatorSubsystem {
             eleSystem.run();
         }
     }
-
-	public DatagramSocket getSocket() {
-		return socket;
-	}
-
-	public DatagramPacket packetData() {
-		return receivePacket;
-	}
-
-	public Map<Integer, String> getEleList() {
-		// TODO Auto-generated method stub
-		return eleList;
-	}
 }
