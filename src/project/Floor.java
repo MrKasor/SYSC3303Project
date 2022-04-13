@@ -18,8 +18,12 @@ public class Floor implements Runnable{
 	
 	/**
 	 * Floor Constructor
+	 * 
+	 * @param id		floor id
+	 * @param numFloors	number of floors
+	 * @param sysRef	Reference to the floorSubsystem
 	 */
-	public Floor(int id, int numEle, FloorSubsystem sysRef){
+	public Floor(int id, int numFloors, FloorSubsystem sysRef){
 		this.id = id;
 		this.sysRef = sysRef;
 		isRequesting = false;
@@ -30,13 +34,17 @@ public class Floor implements Runnable{
 			bottom = false;
 		}
 		
-		if(this.id == numEle ) {
+		if(this.id == numFloors ) {
 			top = true;
 		}else {
 			top = false;
 		}
     }
 	
+	/**
+	 * Runs the Floor Logic
+	 * 
+	 */
 	public void run(){
 		while(true) {
 			elevators = sysRef.eleComing(id);
