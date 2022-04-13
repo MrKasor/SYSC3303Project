@@ -12,7 +12,7 @@ public class ElevatorButton {
 	private boolean buttonPressed;
 	
 	/*
-	 * Elevator button contructor.
+	 * Constructor for ElevatorButton class. Default values given by the corresponding Elevator.
 	 */
 	public ElevatorButton(int elevator, boolean buttonPressed)
 	{

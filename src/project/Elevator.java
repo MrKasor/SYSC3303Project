@@ -27,7 +27,8 @@ public class Elevator implements Runnable{
 	Config config;
 	
 	/**
-	 * Constructor for Elevator. Starts an Elevator thread.
+	 * Constructor for Elevator. Starts an Elevator thread. Assigns default values for id, floor, and 
+	 * also creates door, motor, lamp, and button objects for this elevator.
 	 * 
 	 * @param id
 	 * @param floor
@@ -44,7 +45,11 @@ public class Elevator implements Runnable{
 		config = new Config();
 	}
 	
-	
+	/**
+	 * ElevatorState consists of four states that an elevator will transition through. All elevators initially start
+	 * in the Waiting state.
+	 *
+	 */
 	public enum ElevatorState
 	{
 		Waiting,
@@ -54,14 +59,22 @@ public class Elevator implements Runnable{
 	}
 	ElevatorState state = ElevatorState.Waiting;
 	
-	
+	/**
+	 * This is where elevators are constantly transitioning between states, corresponding to the information
+	 * they receive once they have been sent to a location from the ElevatorSubsystem.
+	 * 
+	 */
 	public void run()
 	{
 		while(true) {
 			
 			String temp = "";
 			switch (state) {
-			
+			  
+        /**
+				 * This is the state upon which the elevator is waiting for further instructions and has either arrived at its
+				 * destination, or is still waiting to be assigned a floor to go to.
+				 */
 				case Waiting:
 					
 					//Set ele as idle
@@ -88,6 +101,9 @@ public class Elevator implements Runnable{
 					
 					break;
 				
+        /**
+				 * This is the state in which an elevator has just been given instructions, and is on its way to pick up passengers.
+				 */
 				case MovingToPassengers:
 					
 					//Move elevator floor by floor up or down
@@ -95,6 +111,7 @@ public class Elevator implements Runnable{
 					//int timing = 0;
 					
 					//going up
+          //While we are going up, increment the current floor up by 1, and update the ElevatorSubsystem that we are at a new floor.
 					while(pickupFloor > curFloor){ 
 						
 						motor.elevatorGoingUp();
@@ -110,6 +127,7 @@ public class Elevator implements Runnable{
 					}
 					
 					//going down
+          //While we are going down, increment the current floor down by 1, and update the ElevatorSubsystem that we are at a new floor.
 					while(pickupFloor < curFloor) {
 						
 						motor.elevatorGoingDown();
@@ -130,6 +148,11 @@ public class Elevator implements Runnable{
 					
 					break;
 					
+         /**
+				 * This is the state in which the elevator has either arrived to pick passengers up, or to drop them off.
+				 * When we are picking up passengers, we go to the MovingToDestination state. When we are dropping them off,
+				 * we go back to the waiting state after they disembark.
+				 */
 				case Stopped:
 					
 					int people = 0;
@@ -194,12 +217,17 @@ public class Elevator implements Runnable{
 					
 					break;
 					
+        /**
+				 * This is the state in which passengers have boarded the elevator, and are now being taken to their
+				 * destination floor.
+				 */
 				case MovingToDestination:
 					
 					//move ele to destination one floor at a time up or down
 					System.out.println("Elevator "+id+": Bringing passengers to floor "+destFloor+".");
 					door.close();
 					//timing = 0;
+          //While we are going up, increment the current floor up by 1, and update the ElevatorSubsystem that we are at a new floor.
 					while(destFloor > curFloor){//going up
 						//timing = destination - destFloor;
 						motor.elevatorGoingUp();
@@ -213,6 +241,7 @@ public class Elevator implements Runnable{
 						sysRef.updateData(id, temp);
 						
 					}
+          //While we are going down, increment the current floor down by 1, and update the ElevatorSubsystem that we are at a new floor.
 					while(destFloor < curFloor){//going down
 						//timing = destFloor - curFloor;
 						motor.elevatorGoingDown();

@@ -14,7 +14,12 @@ import java.util.ArrayList;
 /**
  * @author Colton
  * 
- * Class Scheduler represents the scheduler of the elevator system.
+ * Class Scheduler represents the scheduler of the elevator system. The Scheduler receives a request from
+ * the FloorSubsystem which contains information about the timestamp, request floor, direction, and destination floor.
+ * The Scheduler then requests information from the ElevatorSubsystem as to where all of the elevators currently are. 
+ * The Scheduler then decides which elevator should pick up the passengers, and sends information back to the ElevatorSubsystem
+ * as to what elevator is going, where the passengers are, and where they want to be taken. The scheduler then waits for more 
+ * requests from the FloorSubsystem.
  *
  */
 public class Scheduler{
@@ -36,6 +41,11 @@ public class Scheduler{
 	private int floorPort;
 	private int GUIPort;
 	
+	/**
+	 * Constructor for the Scheduler class. Gathers information from the config file.
+	 * 
+	 * @param config
+	 */
 	public Scheduler(Config config){
 		elePort = config.getIntProperty("elePort");
 		schPort = config.getIntProperty("schPort");
@@ -62,6 +72,11 @@ public class Scheduler{
 		return serverPacket;
 	}
 
+	/**
+	 * SchedulerStates are the states which the Scheduler traverses through.
+	 * The scheduler starts in the WaitingForButtonPress state.
+	 *
+	 */
 	public enum SchedulerState
 	{
 		WaitingForButtonPress,
@@ -72,7 +87,8 @@ public class Scheduler{
 	static SchedulerState state = SchedulerState.WaitingForButtonPress;
 	
 	/**
-	 * receive a packet from the floor subsystem.
+	 * Receives a packet from the floor subsystem. Parses the data into variables for the timestamp,
+	 * request floor, direction and destination floor.
 	 */
 	public void receivePacketFloorSubsystem()
 	{
@@ -117,7 +133,8 @@ public class Scheduler{
 	}
 	
 	/*
-	 * This function determines which elevator will be selected to pick up the passengers.
+	 * This function is used to request the locations of all the elevators, and then determine which
+	 * elevator should pick up the passengers.
 	 */
 	public void requestElevatorLocations()
 	{	
@@ -255,7 +272,8 @@ public class Scheduler{
 	}
 	
 	/*
-	 * Transfers the FloorSubsystem information over to the ElevatorSubsystem.
+	 * This function sends information to the ElevatorSubsystem as to what elevator is to move, where it is picking up passengers,
+	 * and where it is taking them. 
 	 */
 	public void sendToElevatorSubsystem()
 	{
@@ -286,7 +304,7 @@ public class Scheduler{
 	}
 	
 	/*
-	 * Sends the information from the server over to the client.
+	 * This function is used for sending data back to the FloorSubsystem as in what elevator is coming, and where it is going to take them.
 	 */
 	public void sendToFloorSubsystem()
 	{
@@ -317,6 +335,11 @@ public class Scheduler{
 		System.out.println("Scheduler: Packet sent to FloorSubsystem.\n");
 	}
 	
+	/**
+	 * Used for sending information over to the GUI, which it will then display in the Scheduler text field.
+	 * 
+	 * @param message
+	 */
 	public void sendToGUI(String message){
 		String GUIInfo= 0+"|"+message;
 		
@@ -346,6 +369,7 @@ public class Scheduler{
     	Config config = new Config();
 		Scheduler scheduler = new Scheduler(config);
 		
+		//Constantly traverses through the following states. 
 		while(true)
 		{
 			switch (state)

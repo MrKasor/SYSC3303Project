@@ -12,6 +12,13 @@ public class Motor {
 	private boolean goingUp;
 	private boolean motorTurnedOn;
 	
+	/**
+	 * Motor constructor. Assigns default values given by the Elevator class.
+	 * 
+	 * @param elevator
+	 * @param goingUp
+	 * @param isMoving
+	 */
 	public Motor(int elevator, boolean goingUp, boolean isMoving)
 	{
 		this.elevator = elevator;

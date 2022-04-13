@@ -13,7 +13,7 @@ public class ElevatorLamp {
 	private boolean lampOn;
 	
 	/*
-	 * Constructor for Class ElevatorLamp.
+	 * Constructor for Class ElevatorLamp. Default values given by the corresponding Elevator.
 	 */
 	public ElevatorLamp(int elevator, boolean lampOn)
 	{

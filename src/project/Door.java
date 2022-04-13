@@ -13,6 +13,13 @@ public class Door {
 	private boolean doorOpen = false;
 	private boolean doorStuck = false;
 	
+	/**
+	 * Constructor for Door class. The door is given default values by the Elevator class.
+	 * 
+	 * @param elevator
+	 * @param doorOpen
+	 * @param doorStuck
+	 */
 	public Door(int elevator, boolean doorOpen, boolean doorStuck) 
 	{
 		this.elevator = elevator;
